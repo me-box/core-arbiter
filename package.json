@@ -1,0 +1,31 @@
+{
+  "name": "databox-arbiter",
+  "version": "0.1.0",
+  "description": "The Databox Docker container that manages the flow of data",
+  "scripts": {
+    "start": "lsc src/main.ls",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yousefamar/databox-arbiter.git"
+  },
+  "keywords": [
+    "docker",
+    "databox",
+    "personal",
+    "data",
+    "arbiter"
+  ],
+  "author": "Yousef Amar <yousef@amar.io> (http://yousefamar.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yousefamar/databox-arbiter/issues"
+  },
+  "homepage": "https://github.com/yousefamar/databox-arbiter#readme",
+  "dependencies": {
+    "body-parser": "^1.14.2",
+    "express": "^4.13.4",
+    "livescript": "^1.4.0"
+  }
+}
