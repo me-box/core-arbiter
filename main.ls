@@ -1,28 +1,14 @@
-require! { express, 'body-parser' }
+require! { express, 'body-parser', request }
 
-app = express!
+express!
 
-#app.enable 'trust proxy'
+  # TODO: Check
+  ..enable 'trust proxy'
 
-#app.use express.static 'static'
+  ..use body-parser.urlencoded extended: false
 
-app.use body-parser.urlencoded extended: false
+  ..post '/:driver/*' (req, res) !->
+    console.log "Driver: #{req.params.driver}, IP: #{req.ip}, Token: #{req.body.token}"
+    request.get "http://#{req.params.driver}:8080/#{req.params[0]}" .pipe res
 
-app.get '/twitter/api/*' (req, res) !->
-  err, results <-! twitter.fetch req.params[0], req.body
-  if err
-    res.write-head 400
-    err |> JSON.stringify |> res.end
-    return
-  res.header 'Access-Control-Allow-Origin': \*
-  results |> JSON.stringify |> res.end
-
-app.get '/twitter/is-signed-in' (req, res) !->
-  res.header 'Access-Control-Allow-Origin': \*
-  res.end '' + twitter.is-signed-in!
-
-app.post '/400' (req, res) !->
-  res.write-head 400
-  res.end!
-
-app.listen 7999
+  ..listen 7999

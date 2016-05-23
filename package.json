@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "The Databox Docker container that manages the flow of data",
   "scripts": {
-    "start": "lsc src/main.ls",
+    "start": "lsc main.ls",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -26,6 +26,7 @@
   "dependencies": {
     "body-parser": "^1.14.2",
     "express": "^4.13.4",
-    "livescript": "^1.4.0"
+    "livescript": "^1.4.0",
+    "request": "^2.72.0"
   }
 }
