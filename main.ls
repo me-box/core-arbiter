@@ -15,6 +15,10 @@ express!
   ..use body-parser.urlencoded extended: false
 
   ..post \/register (req, res) !->
+    unless req.body.store-id?
+      res.status 400 .send 'Missing storeId parameter'
+      return
+
     if req.body.store-id of secrets
       res.status 409 .send 'Store already registered'
       return
