@@ -1,42 +1,18 @@
-# Databox Arbiter
+Arbiter Flow
+======================
 
-The Databox Docker container that manages the flow of data. This code is not meant to be run on its own except for debug purposes. The live version is automatically pulled from https://amar.io:5000 as "databox-arbiter" and launched by the [container manager](https://github.com/me-box/databox-container-manager.git).
+Combined Flow
+-------------
 
-For debug purposes:
+![A combined diagram of Databox arbiter flow](res/flow.png "Logo Title Text 1")
 
-## Installation
-	git clone https://github.com/me-box/databox-arbiter.git
-	cd databox-arbiter
-	npm install --production
-
-## Usage
-	npm start
-
-Default port is 7999 (for historical reasons; subject to change), but can be overridden using the PORT environment variable, i.e.:
-
-	PORT=8080 npm start
-
-Then interface with http://localhost:7999/.
-
-## API Endpoints
-
-Coming soon.
-
-## Further information
-
-### Arbiter Flow
-
-#### Combined Flow
-
-![A combined diagram of Databox arbiter flow](doc/res/flow.png "Combined Flow Diagram")
-
-##### Part A (blue)
+### Part A (blue)
 
 1. Once the container manager (CM -- not a container itself) is launched, it launches the arbiter container after pulling any updates from the registry. On launching the arbiter, it also supplies it with a public key as an environment variable such that the arbiter can confirm if privileged commands are indeed coming from the CM.
 2. A container (driver or app) is pulled from the registry along with its manifest.
 3. The CM generates unique tokens for every container it will launch, and informs the arbiter of these tokens and the extent of corresponding containers' permissions.
 
-##### Part B (red)
+### Part B (red)
 
 1. Before launching a driver, the CM launches one or more store containers to be written to by this driver -- as specified in the driver's manifest -- and passes the previously generated tokens to these stores.
 2. The stores register themselves with the arbiter using their tokens.
@@ -46,7 +22,7 @@ Coming soon.
 6. On checking the token against the record created in part A step 3, the arbiter generates macaroons that allow writing to corresponding stores.
 7. The driver can now use these macaroons to directly write to its stores (which are accessed by hostname defined by a driver name and names specified in a driver manifest).
 
-##### Part C (green)
+### Part C (green)
 
 1. The CM launches an app container and provides it with a token.
 2. The app uses this token to request read access to one or more stores (see Part B). This process may need to be repeated periodically as macaroons expire.
@@ -55,9 +31,11 @@ Coming soon.
 5. A store, on verifying a macaroon using the secret key supplied to it by the arbiter (see part B step 3) can respond to the app with the data requested.
 
 
-#### Driver-Centric Flow
+---
 
-![A driver-centric diagram of Databox arbiter flow](doc/res/driver-view.png "Driver-Centric Flow Diagram")
+
+Driver-Centric Flow
+-------------------
 
 1. Once the container manager (CM -- not a container itself) is launched, it launches the arbiter container after pulling any updates from the registry. On launching the arbiter, it also supplies it with a public key as an environment variable such that the arbiter can confirm if privileged commands are indeed coming from the CM.
 2. A driver container is pulled from the registry along with its manifest.
@@ -71,9 +49,8 @@ Coming soon.
 10. The driver can now use these macaroons to directly write to its stores (which are accessed by hostname defined by a driver name and names specified in a driver manifest).
 
 
-#### App-Centric Flow
-
-![An app-centric diagram of Databox arbiter flow](doc/res/app-view.png "App-Centric Flow Diagram")
+App-Centric Flow
+----------------
 
 1. Once the container manager (CM -- not a container itself) is launched, it launches the arbiter container after pulling any updates from the registry. On launching the arbiter, it also supplies it with a public key as an environment variable such that the arbiter can confirm if privileged commands are indeed coming from the CM.
 2. An app container is pulled from the registry along with its manifest.
