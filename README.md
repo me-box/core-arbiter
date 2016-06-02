@@ -12,11 +12,11 @@ For debug purposes:
 ## Usage
 	npm start
 
-Default port is 7999 (for historical reasons; subject to change), but can be overridden using the PORT environment variable, i.e.:
+Default port is 8080, but can be overridden using the PORT environment variable, i.e.:
 
-	PORT=8080 npm start
+	PORT=8081 npm start
 
-Then interface with http://localhost:7999/.
+Then interface with http://localhost:8080/.
 
 ## API Endpoints
 

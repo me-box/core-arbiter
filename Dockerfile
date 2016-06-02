@@ -6,6 +6,6 @@ ADD . .
 
 LABEL databox.type="arbiter"
 
-EXPOSE 7999
+EXPOSE 8080
 
 CMD ["npm","start"]
