@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "description": "The Databox Docker container that manages the flow of data",
   "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "lsc main.ls",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "release": "docker build -t databox-arbiter . && docker tag databox-arbiter amar.io:5000/databox-arbiter && docker push amar.io:5000/databox-arbiter"
   },
   "repository": {
     "type": "git",
@@ -25,8 +26,10 @@
   "homepage": "https://github.com/yousefamar/databox-arbiter#readme",
   "dependencies": {
     "body-parser": "^1.14.2",
+    "crypto": "0.0.3",
     "express": "^4.13.4",
     "livescript": "^1.4.0",
+    "macaroons.js": "^0.3.5",
     "request": "^2.72.0"
   }
 }

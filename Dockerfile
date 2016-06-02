@@ -4,6 +4,8 @@ ADD package.json package.json
 RUN npm install
 ADD . .
 
-EXPOSE 7999
+LABEL databox.type="arbiter"
+
+EXPOSE 8080
 
 CMD ["npm","start"]
