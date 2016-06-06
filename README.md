@@ -34,7 +34,8 @@ Updates the record of containers and the extent of their corresponding permissio
 
  - data: A JSON string with the following properties.
    - type: Container type (driver|store|app)
-   - 
+   - token: Container token
+ - sig: a base 64 encoded signature, verified by hashing *data* using md5 and decrypting the result using the cm public key (provided as the environment variable `CM_PUB_KEY`).
 
 | Name | Type        | Params |
 | ---- | ---------- | ------ |
