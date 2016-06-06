@@ -20,7 +20,32 @@ Then interface with http://localhost:8080/.
 
 ## API Endpoints
 
-Coming soon.
+### ConMan-facing
+
+#### /update
+
+##### Description
+
+Method: POST
+
+Updates the record of containers and the extent of their corresponding permissions (default none) maintained by the arbiter.
+
+##### Parameters
+
+ - data: A JSON string with the following properties.
+   - type: Container type (driver|store|app)
+   - 
+
+| Name | Type        | Params |
+| ---- | ---------- | ------ |
+|    | /update    |  |
+| POST   | /register  | |
+| POST   | /:driver/* | |
+
+##### Response
+
+
+
 
 ## Further information
 

@@ -3,7 +3,9 @@ require! { express, 'body-parser', request, crypto, 'macaroons.js' }
 # TODO: Remove when macaroons.js accepts my pull request
 const MACAROON_SUGGESTED_SECRET_LENGTH = macaroons.MacaroonsConstants?.MACAROON_SUGGESTED_SECRET_LENGTH or 32
 
-const CM_SECRET = process.env.CM_SECRET or ''
+const CM_PUB_KEY = process.env.CM_PUB_KEY or ''
+
+console.log CM_PUB_KEY
 
 secrets = {}
 
@@ -13,6 +15,10 @@ express!
   ..enable 'trust proxy'
 
   ..use body-parser.urlencoded extended: false
+
+  ..post \/update (req, res) !->
+
+
 
   ..post \/register (req, res) !->
     unless req.body.store-id?
