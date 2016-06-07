@@ -1,4 +1,4 @@
-require! { express, 'body-parser', request, crypto, 'macaroons.js', ursa }
+require! { express, 'body-parser', request, crypto, 'macaroons.js', 'ursa-purejs': ursa }
 
 # TODO: Remove when macaroons.js accepts my pull request
 const MACAROON_SUGGESTED_SECRET_LENGTH = macaroons.MacaroonsConstants?.MACAROON_SUGGESTED_SECRET_LENGTH or 32

@@ -31,6 +31,6 @@
     "livescript": "^1.4.0",
     "macaroons.js": "^0.3.5",
     "request": "^2.72.0",
-    "ursa": "^0.9.4"
+    "ursa-purejs": "0.0.3"
   }
 }
