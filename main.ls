@@ -1,11 +1,11 @@
 require! { express, 'body-parser', request, crypto, 'macaroons.js', 'ursa-purejs': ursa }
 
-# TODO: Remove when macaroons.js accepts my pull request
-const MACAROON_SUGGESTED_SECRET_LENGTH = macaroons.MacaroonsConstants?.MACAROON_SUGGESTED_SECRET_LENGTH or 32
-
+const PORT = process.env.PORT or 8080
 const CM_PUB_KEY = process.env.CM_PUB_KEY or ''
 
 secrets = {}
+
+containers = {}
 
 express!
 
@@ -26,14 +26,15 @@ express!
       resolve, reject <-! new Promise!
 
       unless body? and body.data? and body.sig?
-        reject 'Missing data'
+        reject 'Missing parameters'
         return
 
-      unless pub.hash-and-verify \md5 body.data, body.sig
+      unless pub.hash-and-verify \md5 body.data, new Buffer body.sig, \base64
         reject 'Signature verification failed'
         return
 
       # TODO: Handle failed parse maybe
+      # TODO: Validate data
       body.data |> JSON.parse |> resolve
 
     (req, res) !->
@@ -48,29 +49,57 @@ express!
           res.status 403 .send "Update request rejected: #reason"
         .then
 
-      console.log data
+      # TODO: Store in a DB maybe? Probably not.
+      unless data.name of containers then containers[data.name] = {}
+      containers[data.name] <<<< data
+
+      containers[data.name] |> JSON.stringify |> res.send
 
   ..post \/register (req, res) !->
-    unless req.body.store-id?
-      res.status 400 .send 'Missing storeId parameter'
+    unless req.body.token?
+      res.status 400 .send 'Missing container token'
       return
 
-    if req.body.store-id of secrets
-      res.status 409 .send 'Store already registered'
+    if req.body.token of secrets
+      res.status 409 .send 'Container already registered'
       return
 
-    err, buffer <-! crypto.random-bytes MACAROON_SUGGESTED_SECRET_LENGTH
+    err, buffer <-! crypto.random-bytes macaroons.MacaroonsConstants.MACAROON_SUGGESTED_SECRET_LENGTH
 
     if err?
-      res.status 500 .send 'Unable to register store (secret generation)'
+      res.status 500 .send 'Unable to register container (secret generation)'
       return
 
-    buffer.to-string \hex
-      secrets[req.body.store-id] = ..
+    buffer.to-string \base64
+      secrets[req.body.token] = ..
       .. |> res.send
+
+  ..post \/macaroon (req, res) !->
+    unless req.body.token? and req.body.target?
+      res.status 400 .send 'Missing parameters'
+      return
+
+    # TODO: Check permissions here!
+
+    # TODO: Construct macaroon based on permissions, not just a generic one
+
+    unless req.body.target of containers
+      res.status 400 .send "Target #{req.body.target} has not been approved for arbitering"
+      return
+
+    target-token = containers[req.body.target]
+
+    unless target-token of secrets
+      res.status 400 .send "Target #{req.body.target} has not registered itself for arbitering"
+      return
+
+    err, buffer <-! crypto.random-bytes 32
+    macaroon = macaroons.MacaroonsBuilder.create "http://arbiter:#PORT", secrets[target-token], buffer.to-string \base64
+
+    macaroon |> (.serialize!) |> res.send
 
   ..post '/:driver/*' (req, res) !->
     console.log "Driver: #{req.params.driver}, IP: #{req.ip}, Token: #{req.body.token}"
     request.get "http://#{req.params.driver}:8080/#{req.params[0]}" .pipe res
 
-  ..listen (process.env.PORT or 8080)
+  ..listen PORT
