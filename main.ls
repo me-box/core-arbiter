@@ -14,6 +14,8 @@ express!
 
   ..use body-parser.urlencoded extended: false
 
+  ..get \/status (req, res) !-> res.send \active
+
   ..post \/update do ->
     pub = if CM_PUB_KEY then ursa.create-public-key CM_PUB_KEY, \base64
 
@@ -42,6 +44,7 @@ express!
 
       data <-! screen req.body
         .catch (reason) !->
+          console.log "Update request rejected: #reason"
           res.status 403 .send "Update request rejected: #reason"
         .then
 
