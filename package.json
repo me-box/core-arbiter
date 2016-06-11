@@ -29,7 +29,8 @@
     "crypto": "0.0.3",
     "express": "^4.13.4",
     "livescript": "^1.4.0",
-    "macaroons.js": "^0.3.5",
-    "request": "^2.72.0"
+    "macaroons.js": "^0.3.6",
+    "request": "^2.72.0",
+    "ursa-purejs": "0.0.3"
   }
 }
