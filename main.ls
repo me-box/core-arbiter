@@ -4,7 +4,6 @@ const PORT = process.env.PORT or 8080
 const CM_PUB_KEY = process.env.CM_PUB_KEY or ''
 
 secrets = {}
-
 containers = {}
 
 express!
@@ -47,6 +46,7 @@ express!
         .catch (reason) !->
           console.log "Update request rejected: #reason"
           res.status 403 .send "Update request rejected: #reason"
+        # TODO: This is wrong...
         .then
 
       # TODO: Store in a DB maybe? Probably not.
@@ -70,36 +70,38 @@ express!
       res.status 500 .send 'Unable to register container (secret generation)'
       return
 
-    buffer.to-string \base64
-      secrets[req.body.token] = ..
-      .. |> res.send
+    secrets[req.body.token] = buffer
+    buffer |> (.to-string \base64) |> res.send
 
   ..post \/macaroon (req, res) !->
     unless req.body.token? and req.body.target?
       res.status 400 .send 'Missing parameters'
       return
 
-    # TODO: Check permissions here!
-
-    # TODO: Construct macaroon based on permissions, not just a generic one
-
     unless req.body.target of containers
       res.status 400 .send "Target #{req.body.target} has not been approved for arbitering"
       return
 
-    target-token = containers[req.body.target]
+    target-token = containers[req.body.target].token
 
     unless target-token of secrets
       res.status 400 .send "Target #{req.body.target} has not registered itself for arbitering"
       return
 
+    # TODO: Check permissions here!
+
     err, buffer <-! crypto.random-bytes 32
-    macaroon = macaroons.MacaroonsBuilder.create "http://arbiter:#PORT", secrets[target-token], buffer.to-string \base64
+    new macaroons.MacaroonsBuilder "http://arbiter:#PORT", secrets[target-token], buffer.to-string \base64
+      .add_first_party_caveat "target = #{req.body.target}"
+      # TODO: Construct macaroon based on permissions, not just a generic one
+      .get-macaroon!
+      .serialize!
+      |> res.send
 
-    macaroon |> (.serialize!) |> res.send
-
+  /*
   ..post '/:driver/*' (req, res) !->
     console.log "Driver: #{req.params.driver}, IP: #{req.ip}, Token: #{req.body.token}"
     request.get "http://#{req.params.driver}:8080/#{req.params[0]}" .pipe res
+  */
 
   ..listen PORT
