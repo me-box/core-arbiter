@@ -93,6 +93,7 @@ express!
     err, buffer <-! crypto.random-bytes 32
     new macaroons.MacaroonsBuilder "http://arbiter:#PORT", secrets[target-token], buffer.to-string \base64
       .add_first_party_caveat "target = #{req.body.target}"
+      .add_first_party_caveat 'path = "/*"'
       # TODO: Construct macaroon based on permissions, not just a generic one
       .get-macaroon!
       .serialize!
