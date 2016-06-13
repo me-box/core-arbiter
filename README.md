@@ -22,6 +22,18 @@ Then interface with http://localhost:8080/.
 
 ### ConMan-facing
 
+#### /status
+
+##### Description
+
+Method: GET
+
+An endpoint required by the CM to signify if a container needs configuration. Can respond with (active|standby).
+
+##### Response
+
+  - 200: active
+
 #### /update
 
 ##### Description
@@ -32,23 +44,113 @@ Updates the record of containers and the extent of their corresponding permissio
 
 ##### Parameters
 
- - data: A JSON string with the following properties.
-   - type: Container type (driver|store|app)
-   - token: Container token
- - sig: a base 64 encoded signature, verified by hashing *data* using md5 and decrypting the result using the cm public key (provided as the environment variable `CM_PUB_KEY`).
-
-| Name | Type        | Params |
-| ---- | ---------- | ------ |
-|    | /update    |  |
-| POST   | /register  | |
-| POST   | /:driver/* | |
+  - data: A JSON string with the following properties:
+    - name: Container name
+    - token: Container token
+    - type: Container type (driver|store|app)
+  - sig: a base 64 encoded signature, verified by hashing *data* using md5 and decrypting the result using the cm public key (provided as the environment variable `CM_PUB_KEY`).
 
 ##### Response
 
+###### Success
 
+  - 200: [JSON-formatted updated container record]
+
+###### Error
+
+  - 403: Update request rejected; [reason]
+    - Unable to verify data due to missing public key
+    - Missing parameters
+    - Signature verification failed
+
+### Container-facing
+
+#### /register
+
+##### Description
+
+Method: POST
+
+Registers a container allowing the arbiter to mint macaroons for the container, and for the container to verify these macaroons independently.
+
+##### Parameters
+
+  - token: The token assigned to a container by the CM
+
+##### Response
+
+###### Success
+
+  - 200: [Base64-encoded secret for verifying container macaroons]
+
+###### Error
+
+  - 400: Missing container token
+  - 409: Container already registered
+  - 500: Unable to register container (secret generation)
+
+#### /macaroon
+
+##### Description
+
+Method: POST
+
+Provides macaroons for containers.
+
+##### Parameters
+
+  - token: The token assigned to a container by the CM
+  - target: The unique name of the target container that will verify the provided macaroon
+
+##### Response
+
+###### Success
+
+  - 200: [Serialzed macaroon]
+
+###### Error
+
+  - 400: Missing parameters
+  - 400: Target [target] has not been approved for arbitering
+  - 400: Target [target] has not registered itself for arbitering
+
+#### /:driver/*
+
+##### Description
+
+Method: POST
+
+**Warning: Deprecated**
+
+Forwards request to a specified driver.
+
+##### URL Parameters
+
+  - driver: The unique name of the target driver
+
+##### Body Parameters
+
+  - token: The token assigned to a container by the CM
+
+##### Response
+
+  - Whatever the specified driver responds
 
 
 ## Further information
+
+### Macaroons
+
+Macaroons are bearer tokens, similar to signed cookies, to which one can add verifiable caveats. See the sidebar [here](http://macaroons.io/) for more information.
+
+One of the main jobs of the arbiter is to mint these macaroons, and pass them on to drivers or apps. Either can then use these macaroons to query stores (to write to them or read from them respectively) with which the store can verify that all caveats are satisfied.
+
+Caveats include:
+  - **target = [name]** - The target store where [name] is its unique name
+  - **time < [timestamp]** - A timestamp that to give the macaroon an expiry date (not yet implemented)
+  - **path = [path]** - A JSON-formatted whitelist of accessible endpoints formatted as defined [here](https://github.com/pillarjs/path-to-regexp#parameters) and are testable [here](http://forbeslindesay.github.io/express-route-tester/). Can be a single path string or an array of path strings. This caveat can be stacked to narrow down allowed paths more and more.
+  - TBA: Caveats for full permissions and granularity restrictions.
+
 
 ### Arbiter Flow
 
