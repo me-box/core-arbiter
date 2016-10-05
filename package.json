@@ -5,7 +5,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "lsc main.ls",
-    "release": "docker build -t databox-arbiter . && docker tag databox-arbiter amar.io:5000/databox-arbiter && docker push amar.io:5000/databox-arbiter"
+    "release": "docker build -t databox-arbiter -f Dockerfile-x86 . && docker tag databox-arbiter amar.io:5000/databox-arbiter && docker push amar.io:5000/databox-arbiter",
+    "release-arm": "docker build -t databox-arbiter -f Dockerfile-arm . && docker tag databox-arbiter amar.io:5000/databox-arbiter && docker push amar.io:5000/databox-arbiter"
   },
   "repository": {
     "type": "git",
