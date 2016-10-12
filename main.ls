@@ -52,7 +52,7 @@ express!
       # TODO: Store in a DB maybe? Probably not.
       unless data.name of containers then containers[data.name] = {}
       containers[data.name] <<<< data
-
+      console.log containers
       containers[data.name] |> JSON.stringify |> res.send
 
   ..post \/register (req, res) !->
@@ -74,18 +74,19 @@ express!
     buffer |> (.to-string \base64) |> res.send
 
   ..post \/macaroon (req, res) !->
+    console.log req.body
     unless req.body.token? and req.body.target?
       res.status 400 .send 'Missing parameters'
       return
 
     unless req.body.target of containers
-      res.status 400 .send "Target #{req.body.target} has not been approved for arbitering"
+      res.status 400 .send "1) Target #{req.body.target} has not been approved for arbitering"
       return
 
     target-token = containers[req.body.target].token
 
     unless target-token of secrets
-      res.status 400 .send "Target #{req.body.target} has not registered itself for arbitering"
+      res.status 400 .send "2) Target #{req.body.target} has not registered itself for arbitering"
       return
 
     # TODO: Check permissions here!
