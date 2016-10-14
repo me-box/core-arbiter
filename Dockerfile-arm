@@ -19,7 +19,7 @@ RUN npm install && npm run clean
 
 ADD . .
 
-LABEL databox.type="store"
+LABEL databox.type="arbiter"
 
 EXPOSE 8080
 
