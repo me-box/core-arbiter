@@ -14,7 +14,7 @@
     "kill": "docker kill databox-arbiter",
     "attach": "docker attach databox-arbiter",
     "shell": "docker run -i -t databox/databox-arbiter /bin/bash",
-    "local": "docker run -i -t databox/databox-arbiter"
+    "local": "docker run -i -t databox/databox-arbiter",
     "tail": "docker logs -f databox-arbiter"
   },
   "repository": {
