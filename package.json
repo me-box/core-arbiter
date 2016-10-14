@@ -5,7 +5,16 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "lsc main.ls",
-    "release": "docker build -t databox-arbiter . && docker tag databox-arbiter amar.io:5000/databox-arbiter && docker push amar.io:5000/databox-arbiter"
+    "build": "docker build -t databox/databox-arbiter .",
+    "deploy": "docker tag databox/databox-arbiter registry.upintheclouds.org/databox-arbiter && docker push registry.upintheclouds.org/databox-arbiter",
+    "build-arm": "docker build -f Dockerfile-arm -t databox/databox-arbiter-arm .",
+    "deploy-arm": "docker tag databox/databox-arbiter-arm registry.upintheclouds.org/databox-arbiter-arm && docker push registry.upintheclouds.org/databox-arbiter-arm",
+    "clean": "node ./node_modules/modclean/bin/modclean.js -p ./node_modules/ -r",
+    "getshell": "docker exec -i -t databox-arbiter /bin/bash",
+    "kill": "docker kill databox-arbiter",
+    "attach": "docker attach databox-arbiter",
+    "shell": "docker run -i -t databox/databox-arbiter /bin/bash",
+    "local": "docker run -i -t databox/databox-arbiter"
   },
   "repository": {
     "type": "git",
@@ -31,6 +40,7 @@
     "livescript": "^1.4.0",
     "macaroons.js": "^0.3.6",
     "request": "^2.72.0",
-    "ursa-purejs": "0.0.3"
+    "ursa-purejs": "0.0.3",
+    "modclean":""
   }
 }
