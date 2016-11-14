@@ -4,7 +4,7 @@
   "description": "The Databox Docker container that manages the flow of data",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "lsc main.ls",
+    "start": "node main.js",
     "build": "docker build -t databox/databox-arbiter .",
     "deploy": "docker tag databox/databox-arbiter registry.upintheclouds.org/databox-arbiter && docker push registry.upintheclouds.org/databox-arbiter",
     "build-arm": "docker build -f Dockerfile-arm -t databox/databox-arbiter-arm .",
@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yousefamar/databox-arbiter.git"
+    "url": "git+https://github.com/me-box/databox-arbiter.git"
   },
   "keywords": [
     "docker",
@@ -31,17 +31,16 @@
   "author": "Yousef Amar <yousef@amar.io> (http://yousefamar.com/)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/yousefamar/databox-arbiter/issues"
+    "url": "https://github.com/me-box/databox-arbiter/issues"
   },
-  "homepage": "https://github.com/yousefamar/databox-arbiter#readme",
+  "homepage": "https://github.com/me-box/databox-arbiter#readme",
   "dependencies": {
     "body-parser": "^1.14.2",
     "crypto": "0.0.3",
     "express": "^4.13.4",
-    "livescript": "^1.4.0",
     "macaroons.js": "^0.3.6",
+    "modclean": "",
     "request": "^2.72.0",
-    "ursa-purejs": "0.0.3",
-    "modclean":""
+    "ursa-purejs": "0.0.3"
   }
 }
