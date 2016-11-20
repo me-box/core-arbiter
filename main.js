@@ -4,7 +4,9 @@ var request = require('request');
 var crypto = require('crypto');
 var macaroons = require('macaroons.js');
 var ursa = require('ursa-purejs');
+var baseCat = require('./base-cat.json');
 
+var DEBUG = !!process.env.DEBUG;
 var PORT = process.env.PORT || 8080;
 var CM_PUB_KEY = process.env.CM_PUB_KEY || '';
 
@@ -15,6 +17,7 @@ var app = express();
 
 // TODO: Check
 app.enable('trust proxy');
+app.disable('x-powered-by');
 
 app.use(bodyParser.urlencoded({
 	extended: false
@@ -27,12 +30,20 @@ app.get('/status', function(req, res){
 app.post('/update', function(){
 	var pub = CM_PUB_KEY ? ursa.createPublicKey(CM_PUB_KEY, 'base64') : null;
 
-	if (pub == null) {
+	if (!DEBUG && pub == null)
 		console.warn('Container manager public key was not received; all update requests will be rejected!');
-	}
 
-	var screen = function(body){
+	if (DEBUG)
+		console.warn('Arbiter running in debug mode; unsigned update requests will be accepted!');
+
+	var screen = function (body) {
 		return new Promise(function(resolve, reject){
+			if (DEBUG) {
+				// TODO: Handle failed parse maybe
+				resolve(JSON.parse(body.data));
+				return;
+			}
+
 			if (!(body != null && body.data != null && body.sig != null)) {
 				reject('Missing parameters');
 				return;
@@ -44,19 +55,23 @@ app.post('/update', function(){
 			}
 
 			// TODO: Handle failed parse maybe
-			// TODO: Validate data
 			resolve(JSON.parse(body.data));
 		});
 	};
 
 	return function(req, res){
-		if (pub == null) {
+		if (!DEBUG && pub == null) {
 			console.warn('Update request rejected from', req.ip);
 			res.status(403).send('Update request rejected; unable to verify data due to missing public key');
 			return;
 		}
 
 		screen(req.body)
+			.then(function (data) {
+				if (data == null || !data.name)
+					throw new Error('Invalid data');
+				return data;
+			})
 			.then(function(data){
 				// TODO: Store in a DB maybe? Probably not.
 				if (!(data.name in containers)) {
@@ -66,8 +81,6 @@ app.post('/update', function(){
 				for(var key in data) {
 					containers[data.name][key] = data[key];
 				}
-
-				console.log(containers);
 
 				res.send(JSON.stringify(containers[data.name]));
 			})
@@ -100,9 +113,13 @@ app.post('/register', function(req, res){
 	});
 });
 
-app.post('/macaroon', function(req, res){
-	console.log(req.body);
+// Serve root Hypercat catalogue
+app.get('/cat', function(req, res){
+	res.setHeader('Content-Type', 'application/json');
+	res.send(JSON.stringify(baseCat));
+});
 
+app.post('/token', function(req, res){
 	if (!(req.body.token != null && req.body.target != null)) {
 		res.status(400).send('Missing parameters');
 		return;
