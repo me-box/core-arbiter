@@ -1,3 +1,5 @@
+var fs = require('fs');
+var https = require('https');
 var express = require('express');
 var bodyParser = require('body-parser');
 var request = require('request');
@@ -8,13 +10,20 @@ var basicAuth = require('basic-auth');
 var baseCat = require('./base-cat.json');
 
 var DEBUG = !!process.env.DEBUG;
-var PORT = process.env.PORT || 8080;
-// TODO: Simplify this by just using the same token system over HTTPS
+var PORT = process.env.PORT || 443;
+// TODO: Consider simplifying this by just using the same token system over HTTPS
 var CM_PUB_KEY = process.env.CM_PUB_KEY || '';
 
 var containers = {};
 
 var app = express();
+
+var credentials = {
+	key:  fs.readFileSync('./certs/key.pem', 'utf8'),
+	cert: fs.readFileSync('./certs/cert.pem', 'utf8'),
+	// TODO: Without
+	passphrase: fs.readFileSync('./certs/passphrase.txt', 'utf8').trim()
+};
 
 // TODO: Check
 app.enable('trust proxy');
@@ -227,4 +236,4 @@ app.get('/store/secret', function (req, res) {
 	});
 });
 
-app.listen(PORT);
+https.createServer(credentials, app).listen(PORT);
