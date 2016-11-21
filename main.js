@@ -216,7 +216,7 @@ app.get('/store/secret', function (req, res) {
 	}
 
 	if (req.container.type !== 'store') {
-		res.status(403).send('Container type "' + req.container.type + '" cannot use arbiter token minting capabilites as it is not a store type');
+		res.status(403).send('Container type "' + req.container.type + '" cannot use arbiter token minting capabilities as it is not a store type');
 		return;
 	}
 

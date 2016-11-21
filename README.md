@@ -1,6 +1,11 @@
 # Databox Arbiter
 
-The Databox Docker container that manages the flow of data. This code is not meant to be run on its own except for debug purposes. The live version is automatically pulled from https://amar.io:5000 as "databox-arbiter" and launched by the [container manager](https://github.com/me-box/databox-container-manager.git).
+The Databox Docker container that manages the flow of data by minting tokens and controlling store discovery. This code is not meant to be run on its own except for debug purposes. The live version is automatically pulled from https://databox.amar.io (see [registry catalogue](https://databox.amar.io/v2/_catalog)) as "databox-arbiter" and launched by the [container manager](https://github.com/me-box/databox-container-manager.git).
+
+If you are a Databox app or driver developer, skip to [the relevant API documentation](#container-facing).
+
+Further background info for Databox system devs [here](docs/further-info.md).
+
 
 For debug purposes:
 
@@ -12,15 +17,19 @@ For debug purposes:
 ## Usage
 	npm start
 
-Default port is 8080, but can be overridden using the PORT environment variable, i.e.:
+Default port is 443 (HTTPS only), but in case of lack of privileges, can be overridden using the PORT environment variable, i.e.:
 
 	PORT=8081 npm start
 
-Then interface with http://localhost:8080/.
+If not running in a Databox context, set the `DEBUG` environment variable to disable container manager signature verification.
+
+Then interface with https://[host]/ where host is e.g. `localhost`.
 
 ## API Endpoints
 
+
 ### ConMan-facing
+_(for Databox developers)_
 
 #### /status
 
@@ -34,21 +43,21 @@ An endpoint required by the CM to signify if a container needs configuration. Ca
 
   - 200: active
 
-#### /update
+#### /cm/upsert-container-info
 
 ##### Description
 
 Method: POST
 
-Updates the record of containers and the extent of their corresponding permissions (default none) maintained by the arbiter.
+Upserts the record of containers and the extent of their corresponding permissions (default none) maintained by the arbiter.
 
 ##### Parameters
 
   - data: A JSON string with the following properties:
-    - name: Container name
-    - token: Container token
+    - name: Container name (required every time)
+    - key:  Container arbiter key
     - type: Container type (driver|store|app)
-  - sig: a base 64 encoded signature, verified by hashing *data* using md5 and decrypting the result using the cm public key (provided as the environment variable `CM_PUB_KEY`).
+  - sig: a base 64 encoded signature, verified by hashing *data* using md5 and decrypting the result using the cm public key (provided as the environment variable `CM_PUB_KEY`). This parameter is not required in `DEBUG` mode.
 
 ##### Response
 
@@ -58,24 +67,26 @@ Updates the record of containers and the extent of their corresponding permissio
 
 ###### Error
 
-  - 403: Update request rejected; [reason]
+  - 400/403: Update request rejected; [reason]
     - Unable to verify data due to missing public key
     - Missing parameters
     - Signature verification failed
 
-### Container-facing
 
-#### /register
+### Store-facing
+_(for Databox developers)_
+
+#### /store/secret
 
 ##### Description
 
-Method: POST
+Method: GET
 
-Registers a container allowing the arbiter to mint macaroons for the container, and for the container to verify these macaroons independently.
+Registers a store allowing the arbiter to mint macaroons for the store, and for the store to verify these macaroons independently.
+
+NB: Container arbiter key (see developer guide) MUST be provided as per section 7.1 of the (Hypercat 3.0 specs)[http://shop.bsigroup.com/upload/276778/PAS_212.pdf]. Containers without proper authorization will not be able to discover certain items, or will be able to discover them but not access them. In the latter case, they are informed as per section 7.3.1.2 of the (Hypercat 3.0 specs)[http://shop.bsigroup.com/upload/276778/PAS_212.pdf].
 
 ##### Parameters
-
-  - token: The token assigned to a container by the CM
 
 ##### Response
 
@@ -85,21 +96,50 @@ Registers a container allowing the arbiter to mint macaroons for the container, 
 
 ###### Error
 
-  - 400: Missing container token
+  - 401: Missing API key (see description above)
+  - 500: Container type unknown by arbiter
+  - 403: Container type [type] cannot use arbiter token minting capabilities as it is not a store type
+  - 409: Store shared secret already retrieved
+  - 500: Unable to register container (secret generation)
+
+
+### Container-facing
+_(For Databox app and/or driver developers)_
+
+#### /cat
+
+##### Description
+
+Method: GET
+
+Serves a top-level [Hypercat](http://www.hypercat.io/) catalogue.
+
+NB: Container arbiter key (see developer guide) MUST be provided as per section 7.1 of the (Hypercat 3.0 specs)[http://shop.bsigroup.com/upload/276778/PAS_212.pdf]. Containers without proper authorization will not be able to discover certain items, or will be able to discover them but not access them. In the latter case, they are informed as per section 7.3.1.2 of the (Hypercat 3.0 specs)[http://shop.bsigroup.com/upload/276778/PAS_212.pdf].
+
+##### Response
+
+###### Success
+
+  - 200: [JSON-encoded Hypercat catalogue]
+
+###### Error
+
+  - 401: Missing API key (see description above)
   - 409: Container already registered
   - 500: Unable to register container (secret generation)
 
-#### /macaroon
+#### /token
 
 ##### Description
 
 Method: POST
 
-Provides macaroons for containers.
+Provides store tokens for containers.
+
+NB: Container arbiter key (see developer guide) MUST be provided as per section 7.1 of the (Hypercat 3.0 specs)[http://shop.bsigroup.com/upload/276778/PAS_212.pdf]. Containers without proper authorization will not be able to discover certain items, or will be able to discover them but not access them. In the latter case, they are informed as per section 7.3.1.2 of the (Hypercat 3.0 specs)[http://shop.bsigroup.com/upload/276778/PAS_212.pdf].
 
 ##### Parameters
 
-  - token: The token assigned to a container by the CM
   - target: The unique name of the target container that will verify the provided macaroon
 
 ##### Response
@@ -110,104 +150,7 @@ Provides macaroons for containers.
 
 ###### Error
 
+  - 401: Missing API key (see description above)
   - 400: Missing parameters
   - 400: Target [target] has not been approved for arbitering
   - 400: Target [target] has not registered itself for arbitering
-
-#### /:driver/*
-
-##### Description
-
-Method: POST
-
-**Warning: Deprecated**
-
-Forwards request to a specified driver.
-
-##### URL Parameters
-
-  - driver: The unique name of the target driver
-
-##### Body Parameters
-
-  - token: The token assigned to a container by the CM
-
-##### Response
-
-  - Whatever the specified driver responds
-
-
-## Further information
-
-### Macaroons
-
-Macaroons are bearer tokens, similar to signed cookies, to which one can add verifiable caveats. See the sidebar [here](http://macaroons.io/) for more information.
-
-One of the main jobs of the arbiter is to mint these macaroons, and pass them on to drivers or apps. Either can then use these macaroons to query stores (to write to them or read from them respectively) with which the store can verify that all caveats are satisfied.
-
-Caveats include:
-  - **target = [name]** - The target store where [name] is its unique name
-  - **time < [timestamp]** - A timestamp that to give the macaroon an expiry date (not yet implemented)
-  - **path = [path]** - A JSON-formatted whitelist of accessible endpoints formatted as defined [here](https://github.com/pillarjs/path-to-regexp#parameters) and are testable [here](http://forbeslindesay.github.io/express-route-tester/). Can be a single path string or an array of path strings. This caveat can be stacked to narrow down allowed paths more and more.
-  - TBA: Caveats for full permissions and granularity restrictions.
-
-
-### Arbiter Flow
-
-#### Combined Flow
-
-![A combined diagram of Databox arbiter flow](doc/res/flow.png "Combined Flow Diagram")
-
-##### Part A (blue)
-
-1. Once the container manager (CM -- not a container itself) is launched, it launches the arbiter container after pulling any updates from the registry. On launching the arbiter, it also supplies it with a public key as an environment variable such that the arbiter can confirm if privileged commands are indeed coming from the CM.
-2. A container (driver or app) is pulled from the registry along with its manifest.
-3. The CM generates unique tokens for every container it will launch, and informs the arbiter of these tokens and the extent of corresponding containers' permissions.
-
-##### Part B (red)
-
-1. Before launching a driver, the CM launches one or more store containers to be written to by this driver -- as specified in the driver's manifest -- and passes the previously generated tokens to these stores.
-2. The stores register themselves with the arbiter using their tokens.
-3. The arbiter generates a secret key for every store, associates it with store tokens, and responds to the request with it. Using this key, a store can now verify macaroons minted by the arbiter and given to apps.
-4. The CM launches a driver container and provides it with a token.
-5. The driver uses this token to request write access to its associated stores. This process may need to be repeated periodically as macaroons expire.
-6. On checking the token against the record created in part A step 3, the arbiter generates macaroons that allow writing to corresponding stores.
-7. The driver can now use these macaroons to directly write to its stores (which are accessed by hostname defined by a driver name and names specified in a driver manifest).
-
-##### Part C (green)
-
-1. The CM launches an app container and provides it with a token.
-2. The app uses this token to request read access to one or more stores (see Part B). This process may need to be repeated periodically as macaroons expire.
-3. On checking the token against the record created in part A step 3, the arbiter generates macaroons that allow reading from corresponding stores. Granularity restrictions or store-specific permissions are encoded as caveats into the macaroons.
-4. The app can now use these macaroons to directly query the stores (which are accessed by hostname defined by a driver name and names specified in a driver manifest).
-5. A store, on verifying a macaroon using the secret key supplied to it by the arbiter (see part B step 3) can respond to the app with the data requested.
-
-
-#### Driver-Centric Flow
-
-![A driver-centric diagram of Databox arbiter flow](doc/res/driver-view.png "Driver-Centric Flow Diagram")
-
-1. Once the container manager (CM -- not a container itself) is launched, it launches the arbiter container after pulling any updates from the registry. On launching the arbiter, it also supplies it with a public key as an environment variable such that the arbiter can confirm if privileged commands are indeed coming from the CM.
-2. A driver container is pulled from the registry along with its manifest.
-3. The CM generates unique IDs for every container it will launch, and informs the arbiter of these IDs and the extent of corresponding containers' permissions.
-4. The CM launches one or more store containers to be written to by this driver -- as specified in the driver's manifest -- and passes the previously generated tokens to these stores.
-5. The stores register themselves with the arbiter using their individual tokens.
-6. The arbiter generates a secret key for every store, associates it with store tokens, and responds to the request with it. Using this key, a store can now verify macaroons minted by the arbiter and given to apps.
-7. The CM launches a driver container and provides it with a token.
-8. The driver uses this token to request write access to its associated stores. This process may need to be repeated periodically as macaroons expire.
-9. On checking the token against the record created in (3), the arbiter generates macaroons that allow writing to corresponding stores.
-10. The driver can now use these macaroons to directly write to its stores (which are accessed by hostname defined by a driver name and names specified in a driver manifest).
-
-
-#### App-Centric Flow
-
-![An app-centric diagram of Databox arbiter flow](doc/res/app-view.png "App-Centric Flow Diagram")
-
-1. Once the container manager (CM -- not a container itself) is launched, it launches the arbiter container after pulling any updates from the registry. On launching the arbiter, it also supplies it with a public key as an environment variable such that the arbiter can confirm if privileged commands are indeed coming from the CM.
-2. An app container is pulled from the registry along with its manifest.
-3. The CM generates unique IDs for every container it will launch, and informs the arbiter of these IDs and the extent of corresponding containers' permissions.
-4. The CM launches an app container and provides it with a token.
-5. The app uses this token to request read access to one or more stores (see DCF). This process may need to be repeated periodically as macaroons expire.
-6. On checking the token against the record created in (3), the arbiter generates macaroons that allow reading from corresponding stores. Granularity restrictions or store-specific permissions are encoded as caveats into the macaroons.
-7. The app can now use these macaroons to directly query the stores (which are accessed by hostname defined by a driver name and names specified in a driver manifest).
-8. A store, on verifying a macaroon using the secret key supplied to it by the arbiter (see (6) in DCF) can respond to the app with the data requested.
