@@ -15,6 +15,8 @@ Caveats include:
 
 ### Arbiter Flow
 
+> Warning: Potentially outdated!
+
 #### Combined Flow
 
 ![A combined diagram of Databox arbiter flow](res/flow.png "Combined Flow Diagram")
