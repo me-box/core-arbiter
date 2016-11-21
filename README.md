@@ -84,7 +84,7 @@ Method: GET
 
 Registers a store allowing the arbiter to mint macaroons for the store, and for the store to verify these macaroons independently.
 
-NB: Container arbiter key (see developer guide) MUST be provided as per section 7.1 of the (Hypercat 3.0 specs)[http://shop.bsigroup.com/upload/276778/PAS_212.pdf]. Containers without proper authorization will not be able to discover certain items, or will be able to discover them but not access them. In the latter case, they are informed as per section 7.3.1.2 of the (Hypercat 3.0 specs)[http://shop.bsigroup.com/upload/276778/PAS_212.pdf].
+NB: Container arbiter key (see developer guide) MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). Containers without proper authorization will not be able to discover certain items, or will be able to discover them but not access them. In the latter case, they are informed as per section 7.3.1.2 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf).
 
 ##### Parameters
 
@@ -114,7 +114,7 @@ Method: GET
 
 Serves a top-level [Hypercat](http://www.hypercat.io/) catalogue.
 
-NB: Container arbiter key (see developer guide) MUST be provided as per section 7.1 of the (Hypercat 3.0 specs)[http://shop.bsigroup.com/upload/276778/PAS_212.pdf]. Containers without proper authorization will not be able to discover certain items, or will be able to discover them but not access them. In the latter case, they are informed as per section 7.3.1.2 of the (Hypercat 3.0 specs)[http://shop.bsigroup.com/upload/276778/PAS_212.pdf].
+NB: Container arbiter key (see developer guide) MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). Containers without proper authorization will not be able to discover certain items, or will be able to discover them but not access them. In the latter case, they are informed as per section 7.3.1.2 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf).
 
 ##### Response
 
@@ -136,7 +136,7 @@ Method: POST
 
 Provides store tokens for containers.
 
-NB: Container arbiter key (see developer guide) MUST be provided as per section 7.1 of the (Hypercat 3.0 specs)[http://shop.bsigroup.com/upload/276778/PAS_212.pdf]. Containers without proper authorization will not be able to discover certain items, or will be able to discover them but not access them. In the latter case, they are informed as per section 7.3.1.2 of the (Hypercat 3.0 specs)[http://shop.bsigroup.com/upload/276778/PAS_212.pdf].
+NB: Container arbiter key (see developer guide) MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). Containers without proper authorization will not be able to discover certain items, or will be able to discover them but not access them. In the latter case, they are informed as per section 7.3.1.2 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf).
 
 ##### Parameters
 
