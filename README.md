@@ -15,6 +15,13 @@ For debug purposes:
 	npm install --production
 
 ## Usage
+Make sure you have a private key, certificate, and passphrase included in `certs` as `key.pem`, `cert.pem`, and `passphrase.txt` respectively for HTTPS, by for example running:
+
+	openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 36
+	echo "arbitering is life" > certs/passphrase.txt
+
+Then start the program with:
+
 	npm start
 
 Default port is 443 (HTTPS only), but in case of lack of privileges, can be overridden using the PORT environment variable, i.e.:
