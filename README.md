@@ -4,7 +4,7 @@ The Databox Docker container that manages the flow of data by minting tokens and
 
 If you are a Databox app or driver developer, skip to [the relevant API documentation](#container-facing).
 
-Further background info for Databox system devs [here](docs/further-info.md).
+Further background info for Databox system devs [here](docs/further-info.md) (*NB: Outdated*).
 
 
 For debug purposes:
@@ -58,13 +58,14 @@ Method: POST
 
 Upserts the record of containers and the extent of their corresponding permissions (default none) maintained by the arbiter.
 
+NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
+
 ##### Parameters
 
   - data: A JSON string with the following properties:
     - name: Container name (required every time)
     - key:  Container arbiter key
     - type: Container type (driver|store|app)
-  - sig: a base 64 encoded signature, verified by hashing *data* using md5 and decrypting the result using the cm public key (provided as the environment variable `CM_PUB_KEY`). This parameter is not required in `DEBUG` mode.
 
 ##### Response
 
@@ -74,11 +75,9 @@ Upserts the record of containers and the extent of their corresponding permissio
 
 ###### Error
 
-  - 400/403: Update request rejected; [reason]
-    - Unable to verify data due to missing public key
-    - Missing parameters
-    - Signature verification failed
-
+  - 401:
+    - Missing API key (see description above)
+    - Unauthorized: Arbiter key invalid
 
 ### Store-facing
 _(for Databox developers)_
