@@ -10,19 +10,19 @@ var basicAuth = require('basic-auth');
 var baseCat = require('./base-cat.json');
 
 var DEBUG = !!process.env.DEBUG;
-var PORT = process.env.PORT || 443;
-// TODO: Consider simplifying this by just using the same token system over HTTPS
+var PORT = process.env.PORT || 8080;
+
 var CM_PUB_KEY = process.env.CM_PUB_KEY || '';
+var HTTPS_CLIENT_CERT = process.env.HTTPS_CLIENT_CERT || '';
+var HTTPS_CLIENT_PRIVATE_KEY = process.env.HTTPS_CLIENT_PRIVATE_KEY || '';
 
 var containers = {};
 
 var app = express();
 
 var credentials = {
-	key:  fs.readFileSync('./certs/key.pem', 'utf8'),
-	cert: fs.readFileSync('./certs/cert.pem', 'utf8'),
-	// TODO: Without
-	passphrase: fs.readFileSync('./certs/passphrase.txt', 'utf8').trim()
+	key:  HTTPS_CLIENT_PRIVATE_KEY,
+	cert: HTTPS_CLIENT_CERT,
 };
 
 // TODO: Check
