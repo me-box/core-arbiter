@@ -44,7 +44,6 @@
     "express": "^4.13.4",
     "macaroons.js": "^0.3.6",
     "modclean": "",
-    "request": "^2.72.0",
-    "ursa-purejs": "0.0.3"
+    "request": "^2.72.0"
   }
 }
