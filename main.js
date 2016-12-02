@@ -136,7 +136,9 @@ app.post('/token', function(req, res){
 
 	var targetContainer = containers[req.body.target];
 
-	if (targetContainer === null) {
+	console.log("targetContainer::", targetContainer, req.body.target);
+
+	if (typeof(targetContainer) == "undefined" && !targetContainer) {
 		res.status(400).send("Target " + req.body.target + " has not been approved for arbitering");
 		return;
 	}
@@ -182,6 +184,8 @@ app.get('/store/secret', function (req, res) {
 			res.status(500).send('Unable to register container (secret generation)');
 			return;
 		}
+
+		console.log("[/store/secret]" + req.container.name + " registered");
 
 		req.container.secret = buffer;
 		res.send(buffer.toString('base64'));
