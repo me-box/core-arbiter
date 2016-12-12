@@ -82,10 +82,11 @@ app.post('/cm/upsert-container-info', function (req, res) {
 		return;
 	}
 
+	var databoxType = data.type || '';
+
 	// TODO: Store in a DB maybe? Probably not.
-	if (!(data.name in containers))
+	if (!(data.name in containers) && databoxType == 'store') {
 		containers[data.name] = {
-			// TODO: Only add for stores
 			catItem: {
 				'item-metadata': [
 					{
@@ -100,6 +101,9 @@ app.post('/cm/upsert-container-info', function (req, res) {
 				href: 'http://' + data.name + ':8080'
 			}
 		};
+	} else {
+		containers[data.name] = {}
+	}
 
 	for(var key in data) {
 		containers[data.name][key] = data[key];
@@ -114,12 +118,14 @@ app.post('/cm/upsert-container-info', function (req, res) {
 app.get('/cat', function(req, res){
 	var cat = JSON.parse(JSON.stringify(baseCat));
 
-	for (name in containers) {
+	for (var name in containers) {
 		var container = containers[name];
 		// TODO: If CM, show all
 		// TODO: Hide items based on container permissions
 		// TODO: If discoverable, but not accessible, inform as per PAS 7.3.1.2
-		cat.items.push(container.catItem);
+		if(container.catItem) {
+			cat.items.push(container.catItem);
+		}
 	}
 
 	res.setHeader('Content-Type', 'application/json');
