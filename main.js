@@ -98,7 +98,7 @@ app.post('/cm/upsert-container-info', function (req, res) {
 						val: data.name
 					}
 				],
-				href: 'http://' + data.name + ':8080'
+				href: 'https://' + data.name + ':8080'
 			}
 		};
 	} else {
