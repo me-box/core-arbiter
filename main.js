@@ -156,11 +156,16 @@ app.post('/token', function(req, res){
 
 	// TODO: Check permissions here!
 
+	var routes = {
+		GET:  '"/*"',
+		POST: '"/*"'
+	};
+
 	crypto.randomBytes(32, function(err, buffer){
 		res.send(
-			new macaroons.MacaroonsBuilder("http://arbiter:" + PORT, targetContainer.secret, buffer.toString('base64'))
-				.add_first_party_caveat("target = " + req.body.target)
-				.add_first_party_caveat('path = "/*"')
+			new macaroons.MacaroonsBuilder('http://arbiter:' + PORT, targetContainer.secret, buffer.toString('base64'))
+				.add_first_party_caveat('target = ' + req.body.target)
+				.add_first_party_caveat('routes = ' + JSON.stringify(routes))
 				.getMacaroon().serialize()
 		);
 	});
