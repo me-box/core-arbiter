@@ -29,8 +29,9 @@ var credentials = {
 app.enable('trust proxy');
 app.disable('x-powered-by');
 
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
-	extended: false
+	extended: true
 }));
 
 app.get('/status', function(req, res){
@@ -74,18 +75,15 @@ app.all('/cm/*', function (req, res, next) {
 /**********************************************************/
 
 app.post('/cm/upsert-container-info', function (req, res) {
-	// TODO: Catch potential error
-	var data = JSON.parse(req.query.data || req.body.data);
+	var data = req.body;
 
 	if (data == null || !data.name) {
 		res.status(400).send('Missing parameters');
 		return;
 	}
 
-	var databoxType = data.type || '';
-
 	// TODO: Store in a DB maybe? Probably not.
-	if (!(data.name in containers) && databoxType == 'store') {
+	if (data.type === 'store' && (!(data.name in containers) || containers[data.name].type !== 'store')) {
 		containers[data.name] = {
 			catItem: {
 				'item-metadata': [
@@ -105,11 +103,28 @@ app.post('/cm/upsert-container-info', function (req, res) {
 		containers[data.name] = {}
 	}
 
+	// TODO: Restrict POSTed data to namespace (else can overwrite catItem)
 	for(var key in data) {
 		containers[data.name][key] = data[key];
 	}
 
-	res.send(JSON.stringify(containers[data.name]));
+	res.json(containers[data.name]);
+});
+
+/**********************************************************/
+
+app.post('/cm/delete-container-info', function (req, res) {
+	var data = req.body;
+
+	if (data == null || !data.name) {
+		res.status(400).send('Missing parameters');
+		return;
+	}
+
+	// TODO: Error if it wasn't there to begin with?
+	delete containers[data.name];
+
+	res.send();
 });
 
 /**********************************************************/
@@ -128,8 +143,7 @@ app.get('/cat', function(req, res){
 		}
 	}
 
-	res.setHeader('Content-Type', 'application/json');
-	res.send(cat);
+	res.json(cat);
 });
 
 /**********************************************************/
@@ -204,3 +218,5 @@ app.get('/store/secret', function (req, res) {
 });
 
 https.createServer(credentials, app).listen(PORT);
+
+module.exports = app;
