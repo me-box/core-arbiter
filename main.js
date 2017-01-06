@@ -45,7 +45,7 @@ app.all([ '/cat', '/token', '/store/*', '/cm/*'], function (req, res, next) {
 	var key = req.get('X-Api-Key') || (creds && creds.name);
 
 	if (!key) {
-		res.status(401).send('Missing API Key');
+		res.status(401).send('Missing API key');
 		return;
 	}
 
@@ -188,6 +188,13 @@ app.post('/token', function(req, res){
 /**********************************************************/
 
 app.get('/store/secret', function (req, res) {
+	if (!req.container) {
+		// NOTE: This can also happen if the CM never uploaded store key
+		//       but should never happen if the CM is up to spec.
+		res.status(401).send('Invalid API key');
+		return;
+	}
+
 	if (!req.container.type) {
 		// NOTE: This should never happen if the CM is up to spec.
 		res.status(500).send('Container type unknown by arbiter');

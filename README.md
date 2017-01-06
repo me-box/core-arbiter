@@ -64,6 +64,7 @@ NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 spec
 
   - name: Container name (required every time)
   - type: Container type (driver|store|app)
+  - key: Container arbiter key
 
 ##### Response
 
@@ -127,6 +128,7 @@ NB: Container arbiter key (see developer guide) MUST be provided as per section 
 ###### Error
 
   - 401: Missing API key (see description above)
+  - 401: Invalid API key (see description above)
   - 500: Container type unknown by arbiter
   - 403: Container type [type] cannot use arbiter token minting capabilities as it is not a store type
   - 409: Store shared secret already retrieved
