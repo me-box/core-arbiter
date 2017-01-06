@@ -18,7 +18,7 @@ describe('Test top-level root catalogue', function() {
 		foo: 'bar'
 	};
 
-	it('GET /cm/upsert-container-info — Register non-store', (done) => {
+	it('POST /cm/upsert-container-info — Insert non-store', (done) => {
 		supertest
 			.post('/cm/upsert-container-info')
 			.auth(process.env.CM_KEY)
@@ -36,7 +36,7 @@ describe('Test top-level root catalogue', function() {
 			.expect(200, cat, done);
 	});
 
-	it('GET /cm/upsert-container-info — Upsert non-store', (done) => {
+	it('POST /cm/upsert-container-info — Update non-store', (done) => {
 		testStore.type = 'something-that-is-not-a-store';
 
 		supertest
@@ -56,9 +56,9 @@ describe('Test top-level root catalogue', function() {
 			.expect(200, cat, done);
 	});
 
-	var expected = null;
+	var expected;
 
-	it('GET /cm/upsert-container-info — Upsert store', (done) => {
+	it('POST /cm/upsert-container-info — Update store', (done) => {
 		testStore.type = 'store';
 
 		expected = JSON.parse(JSON.stringify(testStore));
@@ -85,7 +85,7 @@ describe('Test top-level root catalogue', function() {
 			.expect(200, expected, done);
 	});
 
-	it('GET /cat — After store registered', (done) => {
+	it('POST /cat — After store registered', (done) => {
 		cat.items.push(expected.catItem);
 
 		supertest

@@ -217,8 +217,6 @@ app.get('/store/secret', function (req, res) {
 			return;
 		}
 
-		console.log("[/store/secret]" + req.container.name + " registered");
-
 		req.container.secret = buffer;
 		res.send(buffer.toString('base64'));
 	});

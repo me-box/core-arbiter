@@ -4,35 +4,34 @@ var supertest = require('supertest')(require('../main.js'));
 var assert = require('assert');
 
 describe('Test CM endpoints', function() {
-	it('GET /cm/upsert-container-info — No API key', (done) => {
+	it('POST /cm/upsert-container-info — No API key', (done) => {
 		supertest
 			.post('/cm/upsert-container-info')
-			.expect(401, 'Missing API Key', done);
+			.expect(401, 'Missing API key', done);
 	});
 
-
-	it('GET /cm/upsert-container-info — Invalid key (in header)', (done) => {
+	it('POST /cm/upsert-container-info — Invalid key (in header)', (done) => {
 		supertest
 			.post('/cm/upsert-container-info')
 			.set('X-Api-Key', 'aaa')
 			.expect(401, 'Unauthorized: Arbiter key invalid', done);
 	});
 
-	it('GET /cm/upsert-container-info — Invalid key (as basic auth)', (done) => {
+	it('POST /cm/upsert-container-info — Invalid key (as basic auth)', (done) => {
 		supertest
 			.post('/cm/upsert-container-info')
 			.auth('aaa')
 			.expect(401, 'Unauthorized: Arbiter key invalid', done);
 	});
 
-	it('GET /cm/upsert-container-info — No data', (done) => {
+	it('POST /cm/upsert-container-info — No data', (done) => {
 		supertest
 			.post('/cm/upsert-container-info')
 			.auth(process.env.CM_KEY)
 			.expect(400, 'Missing parameters', done);
 	});
 
-	it('GET /cm/upsert-container-info — No name', (done) => {
+	it('POST /cm/upsert-container-info — No name', (done) => {
 		supertest
 			.post('/cm/upsert-container-info')
 			.auth(process.env.CM_KEY)
@@ -45,7 +44,7 @@ describe('Test CM endpoints', function() {
 		name: 'test-store'
 	};
 
-	it('GET /cm/upsert-container-info — Minimum required', (done) => {
+	it('POST /cm/upsert-container-info — Minimum required', (done) => {
 		supertest
 			.post('/cm/upsert-container-info')
 			.auth(process.env.CM_KEY)
@@ -55,7 +54,7 @@ describe('Test CM endpoints', function() {
 			.expect(200, testData, done);
 	});
 
-	it('GET /cm/upsert-container-info — Upsert new data', (done) => {
+	it('POST /cm/upsert-container-info — Upsert new data', (done) => {
 		testData.nums = [ 1, 2, { half: 2.5 } ];
 
 		supertest
@@ -67,14 +66,14 @@ describe('Test CM endpoints', function() {
 			.expect(200, testData, done);
 	});
 
-	it('GET /cm/delete-container-info — No data', (done) => {
+	it('POST /cm/delete-container-info — No data', (done) => {
 		supertest
 			.post('/cm/delete-container-info')
 			.auth(process.env.CM_KEY)
 			.expect(400, 'Missing parameters', done);
 	});
 
-	it('GET /cm/delete-container-info — No name', (done) => {
+	it('POST /cm/delete-container-info — No name', (done) => {
 		supertest
 			.post('/cm/delete-container-info')
 			.auth(process.env.CM_KEY)
@@ -83,7 +82,7 @@ describe('Test CM endpoints', function() {
 			.expect(400, 'Missing parameters', done);
 	});
 
-	it('GET /cm/delete-container-info — With name', (done) => {
+	it('POST /cm/delete-container-info — With name', (done) => {
 		supertest
 			.post('/cm/delete-container-info')
 			.auth(process.env.CM_KEY)
