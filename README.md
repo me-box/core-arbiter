@@ -62,16 +62,41 @@ NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 spec
 
 ##### Parameters
 
-  - data: A JSON string with the following properties:
-    - name: Container name (required every time)
-    - key:  Container arbiter key
-    - type: Container type (driver|store|app)
+  - name: Container name (required every time)
+  - type: Container type (driver|store|app)
+  - key: Container arbiter key
 
 ##### Response
 
 ###### Success
 
   - 200: [JSON-formatted updated container record]
+
+###### Error
+
+  - 401:
+    - Missing API key (see description above)
+    - Unauthorized: Arbiter key invalid
+
+#### /cm/delete-container-info
+
+##### Description
+
+Method: POST
+
+Deletes a containers record by name.
+
+NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
+
+##### Parameters
+
+  - name: Container name
+
+##### Response
+
+###### Success
+
+  - 200
 
 ###### Error
 
@@ -103,6 +128,7 @@ NB: Container arbiter key (see developer guide) MUST be provided as per section 
 ###### Error
 
   - 401: Missing API key (see description above)
+  - 401: Invalid API key (see description above)
   - 500: Container type unknown by arbiter
   - 403: Container type [type] cannot use arbiter token minting capabilities as it is not a store type
   - 409: Store shared secret already retrieved

@@ -29,8 +29,9 @@ var credentials = {
 app.enable('trust proxy');
 app.disable('x-powered-by');
 
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
-	extended: false
+	extended: true
 }));
 
 app.get('/status', function(req, res){
@@ -44,7 +45,7 @@ app.all([ '/cat', '/token', '/store/*', '/cm/*'], function (req, res, next) {
 	var key = req.get('X-Api-Key') || (creds && creds.name);
 
 	if (!key) {
-		res.status(401).send('Missing API Key');
+		res.status(401).send('Missing API key');
 		return;
 	}
 
@@ -74,18 +75,15 @@ app.all('/cm/*', function (req, res, next) {
 /**********************************************************/
 
 app.post('/cm/upsert-container-info', function (req, res) {
-	// TODO: Catch potential error
-	var data = JSON.parse(req.query.data || req.body.data);
+	var data = req.body;
 
 	if (data == null || !data.name) {
 		res.status(400).send('Missing parameters');
 		return;
 	}
 
-	var databoxType = data.type || '';
-
 	// TODO: Store in a DB maybe? Probably not.
-	if (!(data.name in containers) && databoxType == 'store') {
+	if (data.type === 'store' && (!(data.name in containers) || containers[data.name].type !== 'store')) {
 		containers[data.name] = {
 			catItem: {
 				'item-metadata': [
@@ -105,11 +103,28 @@ app.post('/cm/upsert-container-info', function (req, res) {
 		containers[data.name] = {}
 	}
 
+	// TODO: Restrict POSTed data to namespace (else can overwrite catItem)
 	for(var key in data) {
 		containers[data.name][key] = data[key];
 	}
 
-	res.send(JSON.stringify(containers[data.name]));
+	res.json(containers[data.name]);
+});
+
+/**********************************************************/
+
+app.post('/cm/delete-container-info', function (req, res) {
+	var data = req.body;
+
+	if (data == null || !data.name) {
+		res.status(400).send('Missing parameters');
+		return;
+	}
+
+	// TODO: Error if it wasn't there to begin with?
+	delete containers[data.name];
+
+	res.send();
 });
 
 /**********************************************************/
@@ -128,8 +143,7 @@ app.get('/cat', function(req, res){
 		}
 	}
 
-	res.setHeader('Content-Type', 'application/json');
-	res.send(cat);
+	res.json(cat);
 });
 
 /**********************************************************/
@@ -174,6 +188,13 @@ app.post('/token', function(req, res){
 /**********************************************************/
 
 app.get('/store/secret', function (req, res) {
+	if (!req.container) {
+		// NOTE: This can also happen if the CM never uploaded store key
+		//       but should never happen if the CM is up to spec.
+		res.status(401).send('Invalid API key');
+		return;
+	}
+
 	if (!req.container.type) {
 		// NOTE: This should never happen if the CM is up to spec.
 		res.status(500).send('Container type unknown by arbiter');
@@ -196,11 +217,11 @@ app.get('/store/secret', function (req, res) {
 			return;
 		}
 
-		console.log("[/store/secret]" + req.container.name + " registered");
-
 		req.container.secret = buffer;
 		res.send(buffer.toString('base64'));
 	});
 });
 
 https.createServer(credentials, app).listen(PORT);
+
+module.exports = app;
