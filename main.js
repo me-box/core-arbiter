@@ -129,6 +129,54 @@ app.post('/cm/delete-container-info', function (req, res) {
 
 /**********************************************************/
 
+app.post('/cm/add-container-routes', function (req, res) {
+	var data = req.body;
+
+	if (data == null || !data.name || !data.routes) {
+		res.status(400).send('Missing parameters');
+		return;
+	}
+
+	// TODO: Error if not yet in in records?
+	var container = containers[data.name] = containers[data.name] || { name: data.name };
+	container.routes = container.routes || [];
+
+	for (method in data.routes) {
+		var paths = data.routes[method];
+		paths = typeof paths === 'string' ? [ paths ] : paths;
+		container.routes[method] = container.routes[method] || [];
+		Array.prototype.push.apply(container.routes[method], paths);
+	}
+
+	res.json(container.routes);
+});
+
+/**********************************************************/
+
+app.post('/cm/delete-container-routes', function (req, res) {
+	var data = req.body;
+
+	if (data == null || !data.name || !data.routes) {
+		res.status(400).send('Missing parameters');
+		return;
+	}
+
+	// TODO: Error if not yet in in records?
+	var container = containers[data.name] = containers[data.name] || { name: data.name };
+	container.routes = container.routes || [];
+
+	for (method in data.routes) {
+		var paths = data.routes[method];
+		paths = typeof paths === 'string' ? [ paths ] : paths;
+		container.routes[method] = container.routes[method] || [];
+		container.routes[method] = container.routes[method].filter(path => !paths.includes(path));
+	}
+
+	res.json(container.routes);
+});
+
+/**********************************************************/
+
 // Serve root Hypercat catalogue
 app.get('/cat', function(req, res){
 	var cat = JSON.parse(JSON.stringify(baseCat));
@@ -190,6 +238,7 @@ app.post('/token', function(req, res){
 app.get('/store/secret', function (req, res) {
 	if (!req.container) {
 		// NOTE: This can also happen if the CM never uploaded store key
+		//       or if the CM added routes and never upserted info
 		//       but should never happen if the CM is up to spec.
 		res.status(401).send('Invalid API key');
 		return;
