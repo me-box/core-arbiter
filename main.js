@@ -139,7 +139,7 @@ app.post('/cm/add-container-routes', function (req, res) {
 
 	// TODO: Error if not yet in in records?
 	var container = containers[data.name] = containers[data.name] || { name: data.name };
-	container.routes = container.routes || [];
+	container.routes = container.routes || {};
 
 	for (method in data.routes) {
 		var paths = data.routes[method];
@@ -163,7 +163,7 @@ app.post('/cm/delete-container-routes', function (req, res) {
 
 	// TODO: Error if not yet in in records?
 	var container = containers[data.name] = containers[data.name] || { name: data.name };
-	container.routes = container.routes || [];
+	container.routes = container.routes || {};
 
 	for (method in data.routes) {
 		var paths = data.routes[method];
