@@ -66,6 +66,55 @@ describe('Test CM endpoints', function() {
 			.expect(200, testData, done);
 	});
 
+	it('POST /cm/add-container-routes — Add container routes', (done) => {
+		var routes = {
+			GET:  '/some/path',
+			POST: [ '/a/c', '/a/b', '/a/c' ],
+			ETC:  '/*'
+		};
+
+		var expected = {
+			GET:  [ '/some/path' ],
+			POST: [ '/a/c', '/a/b', '/a/c' ],
+			ETC:  [ '/*' ]
+		};
+
+		supertest
+			.post('/cm/add-container-routes')
+			.auth(process.env.CM_KEY)
+			.set('Content-Type', 'application/json')
+			.send({
+				name: testData.name,
+				routes: routes
+			})
+			.expect('Content-Type', /json/)
+			.expect(200, expected, done);
+	});
+
+	it('POST /cm/delete-container-routes — Delete container routes', (done) => {
+		var routes = {
+			POST: [ '/a/c' ],
+			ETC:  '/*'
+		};
+
+		var expected = {
+			GET:  [ '/some/path' ],
+			POST: [ '/a/b' ],
+			ETC:  []
+		};
+
+		supertest
+			.post('/cm/delete-container-routes')
+			.auth(process.env.CM_KEY)
+			.set('Content-Type', 'application/json')
+			.send({
+				name: testData.name,
+				routes: routes
+			})
+			.expect('Content-Type', /json/)
+			.expect(200, expected, done);
+	});
+
 	it('POST /cm/delete-container-info — No data', (done) => {
 		supertest
 			.post('/cm/delete-container-info')

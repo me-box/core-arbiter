@@ -103,6 +103,83 @@ NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 spec
   - 401:
     - Missing API key (see description above)
     - Unauthorized: Arbiter key invalid
+  - 400: Missing parameters
+
+#### /cm/add-container-routes
+
+##### Description
+
+Method: POST
+
+Adds permissible routes to the record of containers maintained by the arbiter for a particular container.
+
+Routes are encoded directly into tokens (as macaroon caveats). Routes are JSON-formatted method-path pairs. The arbiter is indifferent to methods.
+
+	{
+		"GET":  "/some/path",
+		"POST": [ "/a/b", "/a/c" ],
+		"ETC":  "/*"
+	}
+
+Paths are JSON-formatted whitelists of accessible endpoints formatted as defined [here](https://github.com/pillarjs/path-to-regexp#parameters) and are testable [here](http://forbeslindesay.github.io/express-route-tester/). They can be a single path string or an array of path strings. More information [here](docs/further-info.md) (*NB: Outdated*).
+
+NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
+
+##### Parameters
+
+  - name: Container name
+  - routes: A routes object
+
+##### Response
+
+###### Success
+
+  - 200: [JSON-formatted container routes after modification]
+
+###### Error
+
+  - 401:
+    - Missing API key (see description above)
+    - Unauthorized: Arbiter key invalid
+  - 400: Missing parameters
+
+#### /cm/delete-container-routes
+
+##### Description
+
+Method: POST
+
+Removes all occurrences of provided routes in the record of containers maintained by the arbiter for a particular container. Note that the provided routes must match those in the arbiter records exactly (wildcards and regular expressions do not apply here; only on validation store-side).
+
+Routes are encoded directly into tokens (as macaroon caveats). Routes are JSON-formatted method-path pairs. The arbiter is indifferent to methods.
+
+	{
+		"GET":  "/some/path",
+		"POST": [ "/a/b", "/a/c" ],
+		"ETC":  "/*"
+	}
+
+Paths are JSON-formatted whitelists of accessible endpoints formatted as defined [here](https://github.com/pillarjs/path-to-regexp#parameters) and are testable [here](http://forbeslindesay.github.io/express-route-tester/). They can be a single path string or an array of path strings. More information [here](docs/further-info.md) (*NB: Outdated*).
+
+NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
+
+##### Parameters
+
+  - name: Container name
+  - routes: A routes object
+
+##### Response
+
+###### Success
+
+  - 200: [JSON-formatted container routes after modification]
+
+###### Error
+
+  - 401:
+    - Missing API key (see description above)
+    - Unauthorized: Arbiter key invalid
+  - 400: Missing parameters
 
 ### Store-facing
 _(for Databox developers)_
