@@ -3,15 +3,15 @@
   "version": "0.1.0",
   "description": "The Databox Docker container that manages the flow of data",
   "config": {
-    "databox-registry": "registry.iotdatabox.com"
+    "registry": "registry.iotdatabox.com"
   },
   "scripts": {
     "test": "mocha",
     "start": "node main.js",
     "build": "docker build -f Dockerfile-x86 -t databox/databox-arbiter .",
-    "deploy": "docker tag databox/databox-arbiter $npm_package_config_databox_registry/databox-arbiter && docker push $npm_package_config_databox_registry/databox-arbiter",
+    "deploy": "docker tag databox/databox-arbiter $npm_package_config_registry/databox-arbiter && docker push $npm_package_config_registry/databox-arbiter",
     "build-arm": "docker build -f Dockerfile-arm -t databox/databox-arbiter-arm .",
-    "deploy-arm": "docker tag databox/databox-arbiter-arm $npm_package_config_databox_registry/databox-arbiter-arm && docker push $npm_package_config_databox_registry/databox-arbiter-arm",
+    "deploy-arm": "docker tag databox/databox-arbiter-arm $npm_package_config_registry/databox-arbiter-arm && docker push $npm_package_config_registry/databox-arbiter-arm",
     "clean": "node ./node_modules/modclean/bin/modclean.js -p ./node_modules/ -r",
     "getshell": "docker exec -i -t databox-arbiter /bin/bash",
     "kill": "docker kill databox-arbiter",
