@@ -128,6 +128,7 @@ NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 spec
 ##### Parameters
 
   - name: Container name
+  - target: Target container
   - routes: A routes object
 
 ##### Response
@@ -166,6 +167,7 @@ NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 spec
 ##### Parameters
 
   - name: Container name
+  - target: Target container
   - routes: A routes object
 
 ##### Response
@@ -260,6 +262,7 @@ NB: Container arbiter key (see developer guide) MUST be provided as per section 
 ###### Error
 
   - 401: Missing API key (see description above)
+  - 401: Invalid API key
   - 400: Missing parameters
   - 400: Target [target] has not been approved for arbitering
   - 400: Target [target] has not registered itself for arbitering

@@ -99,7 +99,7 @@ describe('Test store endpoints', function() {
 			.expect(200, expected, done);
 	});
 
-	it('GET /store/secret — No API key', (done) => {
+	it('GET /store/secret — Get secret', (done) => {
 		supertest
 			.get('/store/secret')
 			.auth(storeKey)
