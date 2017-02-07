@@ -128,6 +128,7 @@ NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 spec
 ##### Parameters
 
   - name: Container name
+  - target: Target container
   - routes: A routes object
 
 ##### Response
@@ -166,6 +167,7 @@ NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 spec
 ##### Parameters
 
   - name: Container name
+  - target: Target container
   - routes: A routes object
 
 ##### Response

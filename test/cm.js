@@ -66,6 +66,22 @@ describe('Test CM endpoints', function() {
 			.expect(200, testData, done);
 	});
 
+	it('POST /cm/add-container-routes — Add container routes, no target', (done) => {
+		var routes = {
+			GET:  '/some/path'
+		};
+
+		supertest
+			.post('/cm/add-container-routes')
+			.auth(process.env.CM_KEY)
+			.set('Content-Type', 'application/json')
+			.send({
+				name: testData.name,
+				routes: routes
+			})
+			.expect(400, 'Missing parameters', done);
+	});
+
 	it('POST /cm/add-container-routes — Add container routes', (done) => {
 		var routes = {
 			GET:  '/some/path',
@@ -85,6 +101,33 @@ describe('Test CM endpoints', function() {
 			.set('Content-Type', 'application/json')
 			.send({
 				name: testData.name,
+				target: 'b',
+				routes: routes
+			})
+			.expect('Content-Type', /json/)
+			.expect(200, expected, done);
+	});
+
+	it('POST /cm/add-container-routes — Add container routes, different target', (done) => {
+		var routes = {
+			GET:  '/other/path',
+			POST: [ '/a/z', '/a/b', '/a/c' ],
+			ETC:  '/*'
+		};
+
+		var expected = {
+			GET:  [ '/other/path' ],
+			POST: [ '/a/z', '/a/b', '/a/c' ],
+			ETC:  [ '/*' ]
+		};
+
+		supertest
+			.post('/cm/add-container-routes')
+			.auth(process.env.CM_KEY)
+			.set('Content-Type', 'application/json')
+			.send({
+				name: testData.name,
+				target: 'a',
 				routes: routes
 			})
 			.expect('Content-Type', /json/)
@@ -109,6 +152,7 @@ describe('Test CM endpoints', function() {
 			.set('Content-Type', 'application/json')
 			.send({
 				name: testData.name,
+				target: 'b',
 				routes: routes
 			})
 			.expect('Content-Type', /json/)

@@ -132,23 +132,26 @@ app.post('/cm/delete-container-info', function (req, res) {
 app.post('/cm/add-container-routes', function (req, res) {
 	var data = req.body;
 
-	if (data == null || !data.name || !data.routes) {
+	// TODO: Allow all at once?
+	if (data == null || !data.name || !data.target || !data.routes) {
 		res.status(400).send('Missing parameters');
 		return;
 	}
 
 	// TODO: Error if not yet in in records?
 	var container = containers[data.name] = containers[data.name] || { name: data.name };
-	container.routes = container.routes || {};
+	container.permissions = container.permissions || {};
+	container.permissions[data.target] = container.permissions[data.target] || { routes: {} };
+	var routes = container.permissions[data.target].routes;
 
 	for (method in data.routes) {
 		var paths = data.routes[method];
 		paths = typeof paths === 'string' ? [ paths ] : paths;
-		container.routes[method] = container.routes[method] || [];
-		Array.prototype.push.apply(container.routes[method], paths);
+		routes[method] = routes[method] || [];
+		Array.prototype.push.apply(routes[method], paths);
 	}
 
-	res.json(container.routes);
+	res.json(routes);
 });
 
 /**********************************************************/
@@ -156,23 +159,25 @@ app.post('/cm/add-container-routes', function (req, res) {
 app.post('/cm/delete-container-routes', function (req, res) {
 	var data = req.body;
 
-	if (data == null || !data.name || !data.routes) {
+	if (data == null || !data.name || !data.target || !data.routes) {
 		res.status(400).send('Missing parameters');
 		return;
 	}
 
 	// TODO: Error if not yet in in records?
 	var container = containers[data.name] = containers[data.name] || { name: data.name };
-	container.routes = container.routes || {};
+	container.permissions = container.permissions || {};
+	container.permissions[data.target] = container.permissions[data.target] || { routes: {} };
+	var routes = container.permissions[data.target].routes;
 
 	for (method in data.routes) {
 		var paths = data.routes[method];
 		paths = typeof paths === 'string' ? [ paths ] : paths;
-		container.routes[method] = container.routes[method] || [];
-		container.routes[method] = container.routes[method].filter(path => !paths.includes(path));
+		routes[method] = routes[method] || [];
+		routes[method] = routes[method].filter(path => !paths.includes(path));
 	}
 
-	res.json(container.routes);
+	res.json(routes);
 });
 
 /**********************************************************/
