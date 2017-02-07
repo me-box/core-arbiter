@@ -202,14 +202,20 @@ app.get('/cat', function(req, res){
 /**********************************************************/
 
 app.post('/token', function(req, res){
+	if (!req.container) {
+		// NOTE: This can also happen if the CM never uploaded store key
+		//       or if the CM added routes and never upserted info
+		//       but should never happen if the CM is up to spec.
+		res.status(401).send('Invalid API key');
+		return;
+	}
+
 	if (req.body.target == null) {
 		res.status(400).send('Missing parameters');
 		return;
 	}
 
 	var targetContainer = containers[req.body.target];
-
-	console.log("targetContainer::", targetContainer, req.body.target);
 
 	if (typeof(targetContainer) == "undefined" && !targetContainer) {
 		res.status(400).send("Target " + req.body.target + " has not been approved for arbitering");
@@ -221,12 +227,10 @@ app.post('/token', function(req, res){
 		return;
 	}
 
-	// TODO: Check permissions here!
-
-	var routes = {
-		GET:  '"/*"',
-		POST: '"/*"'
-	};
+	var container = req.container;
+	container.permissions = container.permissions || {};
+	container.permissions[req.body.target] = container.permissions[req.body.target] || { routes: {} };
+	var routes = container.permissions[req.body.target].routes;
 
 	crypto.randomBytes(32, function(err, buffer){
 		res.send(

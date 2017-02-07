@@ -262,6 +262,7 @@ NB: Container arbiter key (see developer guide) MUST be provided as per section 
 ###### Error
 
   - 401: Missing API key (see description above)
+  - 401: Invalid API key
   - 400: Missing parameters
   - 400: Target [target] has not been approved for arbitering
   - 400: Target [target] has not registered itself for arbitering
