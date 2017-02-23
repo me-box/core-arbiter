@@ -8,7 +8,6 @@ var macaroons = require('macaroons.js');
 var basicAuth = require('basic-auth');
 var baseCat = require('./base-cat.json');
 
-var DEBUG = !!process.env.DEBUG;
 var PORT = process.env.PORT || 8080;
 
 var HTTPS_CLIENT_CERT = process.env.HTTPS_CLIENT_CERT || '';
@@ -129,55 +128,63 @@ app.post('/cm/delete-container-info', function (req, res) {
 
 /**********************************************************/
 
-app.post('/cm/add-container-routes', function (req, res) {
+app.post('/cm/grant-container-permissions', function (req, res) {
 	var data = req.body;
 
 	// TODO: Allow all at once?
-	if (data == null || !data.name || !data.target || !data.routes) {
+	if (data == null || !data.name || !data.route || !data.route.target || !data.route.path || !data.route.method) {
 		res.status(400).send('Missing parameters');
 		return;
 	}
 
+	var route = JSON.stringify({
+		target: data.route.target,
+		path:   data.route.path,
+		method: data.route.method
+	});
+
 	// TODO: Error if not yet in in records?
 	var container = containers[data.name] = containers[data.name] || { name: data.name };
-	container.permissions = container.permissions || {};
-	container.permissions[data.target] = container.permissions[data.target] || { routes: {} };
-	var routes = container.permissions[data.target].routes;
+	container.caveats = container.caveats || {};
+	var caveats = container.caveats[route] = container.caveats[route] || [];
 
-	for (method in data.routes) {
-		var paths = data.routes[method];
-		paths = typeof paths === 'string' ? [ paths ] : paths;
-		routes[method] = routes[method] || [];
-		Array.prototype.push.apply(routes[method], paths);
+	if (!data.caveats) {
+		res.json(caveats);
+		return;
 	}
 
-	res.json(routes);
+	Array.prototype.push.apply(caveats, data.caveats);
+	res.json(caveats);
 });
 
 /**********************************************************/
 
-app.post('/cm/delete-container-routes', function (req, res) {
+app.post('/cm/revoke-container-permissions', function (req, res) {
 	var data = req.body;
 
-	if (data == null || !data.name || !data.target || !data.routes) {
+	if (data == null || !data.name || !data.route || !data.route.target || !data.route.path || !data.route.method) {
 		res.status(400).send('Missing parameters');
 		return;
 	}
 
+	var route = JSON.stringify({
+		target: data.route.target,
+		path:   data.route.path,
+		method: data.route.method
+	});
+
 	// TODO: Error if not yet in in records?
 	var container = containers[data.name] = containers[data.name] || { name: data.name };
-	container.permissions = container.permissions || {};
-	container.permissions[data.target] = container.permissions[data.target] || { routes: {} };
-	var routes = container.permissions[data.target].routes;
+	container.caveats = container.caveats || {};
+	container.caveats[route] = container.caveats[route] || [];
 
-	for (method in data.routes) {
-		var paths = data.routes[method];
-		paths = typeof paths === 'string' ? [ paths ] : paths;
-		routes[method] = routes[method] || [];
-		routes[method] = routes[method].filter(path => !paths.includes(path));
+	if (!data.caveats || !data.caveats.length || data.caveats.length < 1) {
+		delete container.caveats[route];
+		res.json(null);
+		return;
 	}
 
-	res.json(routes);
+	res.json(container.caveats[route] = container.caveats[route].filter(caveat => !data.caveats.includes(caveat)));
 });
 
 /**********************************************************/
@@ -210,35 +217,49 @@ app.post('/token', function(req, res){
 		return;
 	}
 
-	if (req.body.target == null) {
+	var data = req.body;
+
+	if (data == null || !data.target || !data.path || !data.method) {
 		res.status(400).send('Missing parameters');
 		return;
 	}
 
-	var targetContainer = containers[req.body.target];
+	var targetContainer = containers[data.target];
 
 	if (typeof(targetContainer) == "undefined" && !targetContainer) {
-		res.status(400).send("Target " + req.body.target + " has not been approved for arbitering");
+		res.status(400).send("Target " + data.target + " has not been approved for arbitering");
 		return;
 	}
 
 	if (!targetContainer.secret) {
-		res.status(400).send("Target " + req.body.target + " has not registered itself for arbitering");
+		res.status(400).send("Target " + data.target + " has not registered itself for arbitering");
 		return;
 	}
 
+	var route = JSON.stringify({
+		target: data.target,
+		path:   data.path,
+		method: data.method
+	});
+
 	var container = req.container;
-	container.permissions = container.permissions || {};
-	container.permissions[req.body.target] = container.permissions[req.body.target] || { routes: {} };
-	var routes = container.permissions[req.body.target].routes;
+	container.caveats = container.caveats || {};
+
+	if (!(route in contaner.caveats)) {
+		res.status(401).send("Insufficient route permissions");
+		return;
+	}
 
 	crypto.randomBytes(32, function(err, buffer){
-		res.send(
-			new macaroons.MacaroonsBuilder('http://arbiter:' + PORT, targetContainer.secret, buffer.toString('base64'))
-				.add_first_party_caveat('target = ' + req.body.target)
-				.add_first_party_caveat('routes = ' + JSON.stringify(routes))
-				.getMacaroon().serialize()
-		);
+		// TODO: Get hostname from environment variable instead of hardcoding
+		var mb = new macaroons.MacaroonsBuilder('https://databox-arbiter:' + PORT, targetContainer.secret, buffer.toString('base64'));
+		mb
+			.add_first_party_caveat('target = ' + data.target)
+			.add_first_party_caveat('path = ' + data.path)
+			.add_first_party_caveat('method = ' + data.method);
+		for (const caveat of container.caveats[route])
+			mb.add_first_party_caveat(caveat);
+		res.send(mb.getMacaroon().serialize());
 	});
 });
 
