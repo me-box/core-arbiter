@@ -245,7 +245,7 @@ app.post('/token', function(req, res){
 	var container = req.container;
 	container.caveats = container.caveats || {};
 
-	if (!(route in contaner.caveats)) {
+	if (!(route in container.caveats)) {
 		res.status(401).send("Insufficient route permissions");
 		return;
 	}
