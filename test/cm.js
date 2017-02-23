@@ -66,97 +66,152 @@ describe('Test CM endpoints', function() {
 			.expect(200, testData, done);
 	});
 
-	it('POST /cm/add-container-routes — Add container routes, no target', (done) => {
-		var routes = {
-			GET:  '/some/path'
-		};
-
+	it('POST /cm/grant-container-permissions — Grant container permissions, no route', (done) => {
 		supertest
-			.post('/cm/add-container-routes')
+			.post('/cm/grant-container-permissions')
 			.auth(process.env.CM_KEY)
 			.set('Content-Type', 'application/json')
 			.send({
-				name: testData.name,
-				routes: routes
+				name: testData.name
 			})
 			.expect(400, 'Missing parameters', done);
 	});
 
-	it('POST /cm/add-container-routes — Add container routes', (done) => {
-		var routes = {
-			GET:  '/some/path',
-			POST: [ '/a/c', '/a/b', '/a/c' ],
-			ETC:  '/*'
-		};
-
-		var expected = {
-			GET:  [ '/some/path' ],
-			POST: [ '/a/c', '/a/b', '/a/c' ],
-			ETC:  [ '/*' ]
+	it('POST /cm/grant-container-permissions — Grant container permissions, incomplete route', (done) => {
+		var route = {
+			target: 'b',
+			path: '/some/path'
 		};
 
 		supertest
-			.post('/cm/add-container-routes')
+			.post('/cm/grant-container-permissions')
 			.auth(process.env.CM_KEY)
 			.set('Content-Type', 'application/json')
 			.send({
 				name: testData.name,
-				target: 'b',
-				routes: routes
+				route: route
 			})
-			.expect('Content-Type', /json/)
-			.expect(200, expected, done);
+			.expect(400, 'Missing parameters', done);
 	});
 
-	it('POST /cm/add-container-routes — Add container routes, different target', (done) => {
-		var routes = {
-			GET:  '/other/path',
-			POST: [ '/a/z', '/a/b', '/a/c' ],
-			ETC:  '/*'
-		};
-
-		var expected = {
-			GET:  [ '/other/path' ],
-			POST: [ '/a/z', '/a/b', '/a/c' ],
-			ETC:  [ '/*' ]
+	it('POST /cm/grant-container-permissions — Grant container permissions, no caveats', (done) => {
+		var route = {
+			target: 'b',
+			path: '/some/path',
+			method: 'GET'
 		};
 
 		supertest
-			.post('/cm/add-container-routes')
+			.post('/cm/grant-container-permissions')
 			.auth(process.env.CM_KEY)
 			.set('Content-Type', 'application/json')
 			.send({
 				name: testData.name,
-				target: 'a',
-				routes: routes
+				route: route
 			})
 			.expect('Content-Type', /json/)
-			.expect(200, expected, done);
+			.expect(200, [], done);
 	});
 
-	it('POST /cm/delete-container-routes — Delete container routes', (done) => {
-		var routes = {
-			POST: [ '/a/c' ],
-			ETC:  '/*'
+	it('POST /cm/grant-container-permissions — Grant container permissions, with caveats', (done) => {
+		var route = {
+			target: 'b',
+			path: '/some/path',
+			method: 'GET'
 		};
 
-		var expected = {
-			GET:  [ '/some/path' ],
-			POST: [ '/a/b' ],
-			ETC:  []
-		};
+		var caveats = [ 'foo = bar', 'time < 999' ];
 
 		supertest
-			.post('/cm/delete-container-routes')
+			.post('/cm/grant-container-permissions')
 			.auth(process.env.CM_KEY)
 			.set('Content-Type', 'application/json')
 			.send({
 				name: testData.name,
-				target: 'b',
-				routes: routes
+				route: route,
+				caveats: caveats
 			})
 			.expect('Content-Type', /json/)
-			.expect(200, expected, done);
+			.expect(200, caveats, done);
+	});
+
+	it('POST /cm/grant-container-permissions — Grant container permissions, different path', (done) => {
+		var route = {
+			target: 'b',
+			path: '/other/path',
+			method: 'GET'
+		};
+
+		supertest
+			.post('/cm/grant-container-permissions')
+			.auth(process.env.CM_KEY)
+			.set('Content-Type', 'application/json')
+			.send({
+				name: testData.name,
+				route: route
+			})
+			.expect('Content-Type', /json/)
+			.expect(200, [], done);
+	});
+
+	it('POST /cm/grant-container-permissions — Grant container permissions, different target', (done) => {
+		var route = {
+			target: 'a',
+			path: '/some/path',
+			method: 'GET'
+		};
+
+		supertest
+			.post('/cm/grant-container-permissions')
+			.auth(process.env.CM_KEY)
+			.set('Content-Type', 'application/json')
+			.send({
+				name: testData.name,
+				route: route
+			})
+			.expect('Content-Type', /json/)
+			.expect(200, [], done);
+	});
+
+	it('POST /cm/revoke-container-permissions — Revoke container permissions, single caveat', (done) => {
+		var route = {
+			method: 'GET',
+			path: '/some/path',
+			target: 'b'
+		};
+
+		var caveats = [ 'time < 999' ];
+
+		supertest
+			.post('/cm/revoke-container-permissions')
+			.auth(process.env.CM_KEY)
+			.set('Content-Type', 'application/json')
+			.send({
+				name: testData.name,
+				route: route,
+				caveats: caveats
+			})
+			.expect('Content-Type', /json/)
+			.expect(200, [ 'foo = bar' ], done);
+	});
+
+	it('POST /cm/revoke-container-permissions — Revoke container permissions, revoke all', (done) => {
+		var route = {
+			path: '/some/path',
+			method: 'GET',
+			target: 'b'
+		};
+
+		supertest
+			.post('/cm/revoke-container-permissions')
+			.auth(process.env.CM_KEY)
+			.set('Content-Type', 'application/json')
+			.send({
+				name: testData.name,
+				route: route
+			})
+			.expect('Content-Type', /json/)
+			.expect(200, null, done);
 	});
 
 	it('POST /cm/delete-container-info — No data', (done) => {

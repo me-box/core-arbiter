@@ -12,30 +12,23 @@ For debug purposes:
 ## Installation
 	git clone https://github.com/me-box/databox-arbiter.git
 	cd databox-arbiter
-	npm install --production
+	npm install
 
 ## Usage
-Make sure you have a private key, certificate, and passphrase included in `certs` as `key.pem`, `cert.pem`, and `passphrase.txt` respectively for HTTPS, by for example running:
 
-	openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 36
-	echo "arbitering is life" > certs/passphrase.txt
+This code should not be run as a standalone app, but rather in a Databox context. Unit tests to make sure it will work in that context can be run with:
 
-Then start the program with:
+	npm test
 
-	npm start
-
-Default port is 443 (HTTPS only), but in case of lack of privileges, can be overridden using the PORT environment variable, i.e.:
+Default port is 8080 (HTTPS only), but in case of lack of privileges, can be overridden using the PORT environment variable, i.e.:
 
 	PORT=8081 npm start
 
-If not running in a Databox context, set the `DEBUG` environment variable to disable container manager signature verification.
-
-Then interface with https://[host]/ where host is e.g. `localhost`.
-
 ## API Endpoints
 
+All request bodies should be `application/json`.
 
-### ConMan-facing
+### CM-facing
 _(for Databox developers)_
 
 #### /status
@@ -105,37 +98,34 @@ NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 spec
     - Unauthorized: Arbiter key invalid
   - 400: Missing parameters
 
-#### /cm/add-container-routes
+#### /cm/grant-container-permissions
 
 ##### Description
 
 Method: POST
 
-Adds permissible routes to the record of containers maintained by the arbiter for a particular container.
+Adds permissions to the record of containers maintained by the arbiter for a particular route.
 
-Routes are encoded directly into tokens (as macaroon caveats). Routes are JSON-formatted method-path pairs. The arbiter is indifferent to methods.
+Routes are encoded into tokens (as macaroon caveats). Routes are made up of a target container, an API path, and an HTTP method. The arbiter is indifferent to methods, but for the majority of APIs, `GET` requests map to read operations, and `POST` requests map to write operations.
 
-	{
-		"GET":  "/some/path",
-		"POST": [ "/a/b", "/a/c" ],
-		"ETC":  "/*"
-	}
-
-Paths are JSON-formatted whitelists of accessible endpoints formatted as defined [here](https://github.com/pillarjs/path-to-regexp#parameters) and are testable [here](http://forbeslindesay.github.io/express-route-tester/). They can be a single path string or an array of path strings. More information [here](docs/further-info.md) (*NB: Outdated*).
+Paths are JSON-formatted whitelists of accessible endpoints formatted as defined [here](https://github.com/pillarjs/path-to-regexp#parameters) and are testable [here](http://forbeslindesay.github.io/express-route-tester/). More information [here](https://github.com/me-box/admin/blob/master/specs/token-auth.md#path--datasourceapi).
 
 NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
 
 ##### Parameters
 
   - name: Container name
-  - target: Target container
-  - routes: A routes object
+  - route:
+    - target: Target container hostname
+    - path:   API path
+    - method: HTTP method
+  - caveats: String array of route-specific caveats (all optional, see [here](https://github.com/me-box/admin/blob/master/specs/token-auth.md) for explanations).
 
 ##### Response
 
 ###### Success
 
-  - 200: [JSON-formatted container routes after modification]
+  - 200: [JSON array of route caveats after modification]
 
 ###### Error
 
@@ -144,37 +134,32 @@ NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 spec
     - Unauthorized: Arbiter key invalid
   - 400: Missing parameters
 
-#### /cm/delete-container-routes
+#### /cm/revoke-container-permissions
 
 ##### Description
 
 Method: POST
 
-Removes all occurrences of provided routes in the record of containers maintained by the arbiter for a particular container. Note that the provided routes must match those in the arbiter records exactly (wildcards and regular expressions do not apply here; only on validation store-side).
-
-Routes are encoded directly into tokens (as macaroon caveats). Routes are JSON-formatted method-path pairs. The arbiter is indifferent to methods.
-
-	{
-		"GET":  "/some/path",
-		"POST": [ "/a/b", "/a/c" ],
-		"ETC":  "/*"
-	}
-
-Paths are JSON-formatted whitelists of accessible endpoints formatted as defined [here](https://github.com/pillarjs/path-to-regexp#parameters) and are testable [here](http://forbeslindesay.github.io/express-route-tester/). They can be a single path string or an array of path strings. More information [here](docs/further-info.md) (*NB: Outdated*).
+Does the opposite of `/cm/grant-container-permissions`. Note that the provided routes must match those in the arbiter records exactly (wildcards and regular expressions do not apply here; only on validation store-side).
 
 NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
 
 ##### Parameters
 
   - name: Container name
-  - target: Target container
-  - routes: A routes object
+  - route:
+    - target: Target container hostname
+    - path:   API path
+    - method: HTTP method
+  - caveats: String array of route-specific caveats to delete. If none specified, all permissions for this route are completely revoked.
 
 ##### Response
 
 ###### Success
 
-  - 200: [JSON-formatted container routes after modification]
+  - 200:
+    - [JSON array of route caveats after modification]
+    - null (if all permissions are revoked)
 
 ###### Error
 
@@ -236,8 +221,6 @@ NB: Container arbiter key (see developer guide) MUST be provided as per section 
 ###### Error
 
   - 401: Missing API key (see description above)
-  - 409: Container already registered
-  - 500: Unable to register container (secret generation)
 
 #### /token
 
@@ -251,7 +234,9 @@ NB: Container arbiter key (see developer guide) MUST be provided as per section 
 
 ##### Parameters
 
-  - target: The unique name of the target container that will verify the provided macaroon
+  - target: The unique hostname of the target container that will verify the provided macaroon
+  - path:   API path for which the token should be minted for
+  - method: HTTP method for which the token should be minted for
 
 ##### Response
 
@@ -261,8 +246,11 @@ NB: Container arbiter key (see developer guide) MUST be provided as per section 
 
 ###### Error
 
-  - 401: Missing API key (see description above)
-  - 401: Invalid API key
-  - 400: Missing parameters
-  - 400: Target [target] has not been approved for arbitering
-  - 400: Target [target] has not registered itself for arbitering
+  - 401:
+    - Missing API key (see description above)
+    - Invalid API key
+    - Insufficient route permissions
+  - 400:
+    - Missing parameters
+    - Target [target] has not been approved for arbitering
+    - Target [target] has not registered itself for arbitering
