@@ -47,24 +47,40 @@ describe('Test token endpoint', function() {
 			.expect(200, testApp, done);
 	});
 
-	it('POST /token — Grab token for non-existent store', (done) => {
+	it('POST /token — Grab token for incomplete route', (done) => {
 		supertest
 			.post('/token')
 			.auth(testApp.key)
 			.set('Content-Type', 'application/json')
 			.send({
-				target: 'some-store'
+				target: 'some-store',
+				path: '/some/path'
+			})
+			.expect(400, 'Missing parameters', done);
+	});
+
+	it('POST /token — Grab token for non-existent target', (done) => {
+		supertest
+			.post('/token')
+			.auth(testApp.key)
+			.set('Content-Type', 'application/json')
+			.send({
+				target: 'some-store',
+				path: '/some/path',
+				method: 'GET'
 			})
 			.expect(400, 'Target some-store has not been approved for arbitering', done);
 	});
 
-	it('POST /token — Grab token for unregistered store', (done) => {
+	it('POST /token — Grab token for unregistered target', (done) => {
 		supertest
 			.post('/token')
 			.auth(testApp.key)
 			.set('Content-Type', 'application/json')
 			.send({
-				target: testStore.name
+				target: testStore.name,
+				path: '/some/path',
+				method: 'GET'
 			})
 			.expect(400, 'Target ' + testStore.name + ' has not registered itself for arbitering', done);
 	});
@@ -85,45 +101,117 @@ describe('Test token endpoint', function() {
 			.expect(200, true, done);
 	});
 
-	var expected = {
-		GET:  [ '/some/path' ],
-		POST: [ '/a/c', '/a/b', '/a/c' ],
-		ETC:  [ '/*' ]
-	};
-
-	it('POST /cm/add-container-routes — Add container routes', (done) => {
-		var routes = {
-			GET:  '/some/path',
-			POST: [ '/a/c', '/a/b', '/a/c' ],
-			ETC:  '/*'
+	it('POST /cm/grant-container-permissions — Grant container permissions, no extra caveats', (done) => {
+		var route = {
+			target: testStore.name,
+			path: '/some/path',
+			method: 'GET'
 		};
 
 		supertest
-			.post('/cm/add-container-routes')
+			.post('/cm/grant-container-permissions')
 			.auth(process.env.CM_KEY)
 			.set('Content-Type', 'application/json')
 			.send({
 				name: testApp.name,
-				target: testStore.name,
-				routes: routes
+				route: route
 			})
 			.expect('Content-Type', /json/)
-			.expect(200, expected, done);
+			.expect(200, [], done);
 	});
 
-	it('POST /token — Grab token', (done) => {
+	it('POST /token — Grab token for route with insufficient permissions (path)', (done) => {
 		supertest
 			.post('/token')
 			.auth(testApp.key)
 			.set('Content-Type', 'application/json')
 			.send({
-				target: testStore.name
+				target: testStore.name,
+				path: '/other/path',
+				method: 'GET'
 			})
+			.expect(401, 'Insufficient route permissions', done);
+	});
+
+	it('POST /token — Grab token for route with insufficient permissions (method)', (done) => {
+		supertest
+			.post('/token')
+			.auth(testApp.key)
+			.set('Content-Type', 'application/json')
+			.send({
+				target: testStore.name,
+				path: '/some/path',
+				method: 'POST'
+			})
+			.expect(401, 'Insufficient route permissions', done);
+	});
+
+	it('POST /token — Grab token, no extra caveats', (done) => {
+		var route = {
+			target: testStore.name,
+			path: '/some/path',
+			method: 'GET'
+		};
+
+		supertest
+			.post('/token')
+			.auth(testApp.key)
+			.set('Content-Type', 'application/json')
+			.send(route)
 			.expect(function (res) {
 				var macaroon = macaroons.MacaroonsBuilder.deserialize(res.text);
 				macaroon = macaroon.inspect().split('\n');
-				res.text = macaroon[2] === 'cid target = test-store'
-				        && macaroon[3] === 'cid routes = ' + JSON.stringify(expected);
+				res.text = macaroon[2] === 'cid target = ' + route.target
+				        && macaroon[3] === 'cid path = '   + route.path
+				        && macaroon[4] === 'cid method = ' + route.method;
+			})
+			.expect(200, true, done);
+	});
+
+	it('POST /cm/grant-container-permissions — Grant container permissions, more caveats', (done) => {
+		var route = {
+			target: testStore.name,
+			path: '/some/path',
+			method: 'GET'
+		};
+
+		var caveats = [ 'foo = bar', 'time < 999' ];
+
+		supertest
+			.post('/cm/grant-container-permissions')
+			.auth(process.env.CM_KEY)
+			.set('Content-Type', 'application/json')
+			.send({
+				name: testApp.name,
+				route: route,
+				caveats: caveats
+			})
+			.expect('Content-Type', /json/)
+			.expect(200, caveats, done);
+	});
+
+	it('POST /token — Grab token, extra caveats', (done) => {
+		var route = {
+			target: testStore.name,
+			path: '/some/path',
+			method: 'GET'
+		};
+
+		var caveats = [ 'foo = bar', 'time < 999' ];
+
+		supertest
+			.post('/token')
+			.auth(testApp.key)
+			.set('Content-Type', 'application/json')
+			.send(route)
+			.expect(function (res) {
+				var macaroon = macaroons.MacaroonsBuilder.deserialize(res.text);
+				macaroon = macaroon.inspect().split('\n');
+				res.text = macaroon[2] === 'cid target = ' + route.target
+				        && macaroon[3] === 'cid path = '   + route.path
+				        && macaroon[4] === 'cid method = ' + route.method
+				        && macaroon[5] === 'cid ' + caveats[0]
+				        && macaroon[6] === 'cid ' + caveats[1];
 			})
 			.expect(200, true, done);
 	});
