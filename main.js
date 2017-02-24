@@ -10,8 +10,8 @@ var baseCat = require('./base-cat.json');
 
 var PORT = process.env.PORT || 8080;
 
-var HTTPS_CLIENT_CERT = process.env.HTTPS_CLIENT_CERT || '';
-var HTTPS_CLIENT_PRIVATE_KEY = process.env.HTTPS_CLIENT_PRIVATE_KEY || '';
+var HTTPS_SERVER_CERT = process.env.HTTPS_SERVER_CERT || '';
+var HTTPS_SERVER_PRIVATE_KEY = process.env.HTTPS_SERVER_PRIVATE_KEY || '';
 
 var CM_KEY = process.env.CM_KEY || '';
 
@@ -20,8 +20,8 @@ var containers = {};
 var app = express();
 
 var credentials = {
-	key:  HTTPS_CLIENT_PRIVATE_KEY,
-	cert: HTTPS_CLIENT_CERT,
+	key:  HTTPS_SERVER_PRIVATE_KEY,
+	cert: HTTPS_SERVER_CERT,
 };
 
 // TODO: Check
