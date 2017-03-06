@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 var request = require('request');
 var crypto = require('crypto');
 var macaroons = require('macaroons.js');
+var pathToRegexp = require('path-to-regexp');
 var basicAuth = require('basic-auth');
 var baseCat = require('./base-cat.json');
 
@@ -143,10 +144,22 @@ app.post('/cm/grant-container-permissions', function (req, res) {
 		method: data.route.method
 	});
 
+	var pathMapHash = JSON.stringify({
+		target: data.route.target,
+		method: data.route.method
+	});
+
 	// TODO: Error if not yet in in records?
 	var container = containers[data.name] = containers[data.name] || { name: data.name };
 	container.caveats = container.caveats || {};
 	var caveats = container.caveats[route] = container.caveats[route] || [];
+	// NOTE: Separate map for constant time instead of O(N)
+	container.paths = container.paths || {};
+	container.paths[pathMapHash] = container.paths[pathMapHash] || [];
+	container.paths[pathMapHash].push({
+		string: data.route.path,
+		regExp: pathToRegexp(data.route.path)
+	});
 
 	if (!data.caveats) {
 		res.json(caveats);
@@ -173,10 +186,20 @@ app.post('/cm/revoke-container-permissions', function (req, res) {
 		method: data.route.method
 	});
 
+	var pathMapHash = JSON.stringify({
+		target: data.route.target,
+		method: data.route.method
+	});
+
 	// TODO: Error if not yet in in records?
 	var container = containers[data.name] = containers[data.name] || { name: data.name };
 	container.caveats = container.caveats || {};
 	container.caveats[route] = container.caveats[route] || [];
+	// NOTE: Separate map for constant time instead of O(N)
+	container.paths = container.paths || {};
+	container.paths[pathMapHash] = container.paths[pathMapHash] || [];
+	var wanted = pathToRegexp(data.route.path);
+	container.paths[pathMapHash] = container.paths[pathMapHash].filter(path => !wanted.test(path.string));
 
 	if (!data.caveats || !data.caveats.length || data.caveats.length < 1) {
 		delete container.caveats[route];
@@ -242,10 +265,17 @@ app.post('/token', function(req, res){
 		method: data.method
 	});
 
+	var pathMapHash = JSON.stringify({
+		target: data.target,
+		method: data.method
+	});
+
 	var container = req.container;
 	container.caveats = container.caveats || {};
+	container.paths = container.paths || {};
+	container.paths[pathMapHash] = container.paths[pathMapHash] || [];
 
-	if (!(route in container.caveats)) {
+	if (!(route in container.caveats) && !container.paths[pathMapHash].find((path) => path.regExp.test(data.path))) {
 		res.status(401).send("Insufficient route permissions");
 		return;
 	}
