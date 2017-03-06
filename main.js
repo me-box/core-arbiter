@@ -287,8 +287,9 @@ app.post('/token', function(req, res){
 			.add_first_party_caveat('target = ' + data.target)
 			.add_first_party_caveat('path = ' + data.path)
 			.add_first_party_caveat('method = ' + data.method);
-		for (const caveat of container.caveats[route])
-			mb.add_first_party_caveat(caveat);
+		if (route in container.caveats)
+			for (const caveat of container.caveats[route])
+				mb.add_first_party_caveat(caveat);
 		res.send(mb.getMacaroon().serialize());
 	});
 });
