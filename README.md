@@ -108,7 +108,7 @@ Adds permissions to the record of containers maintained by the arbiter for a par
 
 Routes are encoded into tokens (as macaroon caveats). Routes are made up of a target container, an API path, and an HTTP method. The arbiter is indifferent to methods, but for the majority of APIs, `GET` requests map to read operations, and `POST` requests map to write operations.
 
-Paths are JSON-formatted whitelists of accessible endpoints formatted as defined [here](https://github.com/pillarjs/path-to-regexp#parameters) and are testable [here](http://forbeslindesay.github.io/express-route-tester/). More information [here](https://github.com/me-box/admin/blob/master/specs/token-auth.md#path--datasourceapi).
+Paths are JSON-formatted whitelists of accessible endpoints formatted as defined [here](https://github.com/pillarjs/path-to-regexp#parameters) and are testable [here](http://forbeslindesay.github.io/express-route-tester/). More information [here](https://github.com/me-box/admin/blob/master/specs/token-auth.md#path--datasourceapi). The arbiter will mint tokens to paths (exact or RegExp) that match granted path permissions following those RegExp rules.
 
 NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
 
@@ -140,7 +140,7 @@ NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 spec
 
 Method: POST
 
-Does the opposite of `/cm/grant-container-permissions`. Note that the provided routes must match those in the arbiter records exactly (wildcards and regular expressions do not apply here; only on validation store-side).
+Does the opposite of `/cm/grant-container-permissions`. If the specified path is a RegExp path, then _all_ matches will be revoked, so use wildcards carefully.
 
 NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
 
