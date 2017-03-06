@@ -215,4 +215,89 @@ describe('Test token endpoint', function() {
 			})
 			.expect(200, true, done);
 	});
+
+	it('POST /cm/grant-container-permissions — Grant container permissions, wildcard path', (done) => {
+		var route = {
+			target: testStore.name,
+			path: '/foo/*',
+			method: 'GET'
+		};
+
+		supertest
+			.post('/cm/grant-container-permissions')
+			.auth(process.env.CM_KEY)
+			.set('Content-Type', 'application/json')
+			.send({
+				name: testApp.name,
+				route: route
+			})
+			.expect('Content-Type', /json/)
+			.expect(200, [], done);
+	});
+
+	it('POST /token — Grab token for route with insufficient permissions (wildcard path)', (done) => {
+		supertest
+			.post('/token')
+			.auth(testApp.key)
+			.set('Content-Type', 'application/json')
+			.send({
+				target: testStore.name,
+				path: '/baz/*',
+				method: 'GET'
+			})
+			.expect(401, 'Insufficient route permissions', done);
+	});
+
+	it('POST /token — Grab token, wildcard permissions', (done) => {
+		var route = {
+			target: testStore.name,
+			path: '/foo/bar',
+			method: 'GET'
+		};
+		supertest
+			.post('/token')
+			.auth(testApp.key)
+			.set('Content-Type', 'application/json')
+			.send(route)
+			.expect(function (res) {
+				var macaroon = macaroons.MacaroonsBuilder.deserialize(res.text);
+				macaroon = macaroon.inspect().split('\n');
+				res.text = macaroon[2] === 'cid target = ' + route.target
+				        && macaroon[3] === 'cid path = '   + route.path
+				        && macaroon[4] === 'cid method = ' + route.method;
+			})
+			.expect(200, true, done);
+	});
+
+	it('POST /cm/revoke-container-permissions — Revoke container permissions, wildcard path', (done) => {
+		var route = {
+			target: testStore.name,
+			path: '/*',
+			method: 'GET'
+		};
+
+		supertest
+			.post('/cm/revoke-container-permissions')
+			.auth(process.env.CM_KEY)
+			.set('Content-Type', 'application/json')
+			.send({
+				name: testApp.name,
+				route: route
+			})
+			.expect('Content-Type', /json/)
+			.expect(200, null, done);
+	});
+
+	it('POST /token — Grab token for route with insufficient permissions (wildcard path)', (done) => {
+		supertest
+			.post('/token')
+			.auth(testApp.key)
+			.set('Content-Type', 'application/json')
+			.send({
+				target: testStore.name,
+				path: '/foo/bar',
+				method: 'GET'
+			})
+			.expect(401, 'Insufficient route permissions', done);
+	});
 });
