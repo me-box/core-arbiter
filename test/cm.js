@@ -173,6 +173,44 @@ describe('Test CM endpoints', function() {
 			.expect(200, [], done);
 	});
 
+	it('POST /cm/grant-container-permissions — Grant container permissions, different target, wildcard', (done) => {
+		var route = {
+			target: 'a',
+			path: '/foo/*',
+			method: 'GET'
+		};
+
+		supertest
+			.post('/cm/grant-container-permissions')
+			.auth(process.env.CM_KEY)
+			.set('Content-Type', 'application/json')
+			.send({
+				name: testData.name,
+				route: route
+			})
+			.expect('Content-Type', /json/)
+			.expect(200, [], done);
+	});
+
+	it('POST /cm/revoke-container-permissions — Revoke container permissions, different target, wildcard', (done) => {
+		var route = {
+			target: 'a',
+			path: '/foo/*',
+			method: 'GET'
+		};
+
+		supertest
+			.post('/cm/revoke-container-permissions')
+			.auth(process.env.CM_KEY)
+			.set('Content-Type', 'application/json')
+			.send({
+				name: testData.name,
+				route: route
+			})
+			.expect('Content-Type', /json/)
+			.expect(200, null, done);
+	});
+
 	it('POST /cm/revoke-container-permissions — Revoke container permissions, single caveat', (done) => {
 		var route = {
 			method: 'GET',

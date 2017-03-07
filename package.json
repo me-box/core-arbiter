@@ -44,6 +44,7 @@
     "express": "^4.13.4",
     "macaroons.js": "^0.3.6",
     "modclean": "",
+    "path-to-regexp": "^1.7.0",
     "request": "^2.72.0"
   },
   "devDependencies": {
