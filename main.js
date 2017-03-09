@@ -82,31 +82,28 @@ app.post('/cm/upsert-container-info', function (req, res) {
 		return;
 	}
 
+	containers[data.name] = containers[data.name] || {};
+
 	// TODO: Store in a DB maybe? Probably not.
-	if (data.type === 'store' && (!(data.name in containers) || containers[data.name].type !== 'store')) {
-		containers[data.name] = {
-			catItem: {
-				'item-metadata': [
-					{
-						rel: 'urn:X-hypercat:rels:isContentType',
-						val: 'application/vnd.hypercat.catalogue+json'
-					},
-					{
-						rel: 'urn:X-hypercat:rels:hasDescription:en',
-						val: data.name
-					}
-				],
-				href: 'https://' + data.name + ':8080'
-			}
+	if (data.type === 'store' && containers[data.name].type !== 'store') {
+		containers[data.name].catItem = {
+			'item-metadata': [
+				{
+					rel: 'urn:X-hypercat:rels:isContentType',
+					val: 'application/vnd.hypercat.catalogue+json'
+				},
+				{
+					rel: 'urn:X-hypercat:rels:hasDescription:en',
+					val: data.name
+				}
+			],
+			href: 'https://' + data.name + ':8080'
 		};
-	} else {
-		containers[data.name] = {}
 	}
 
 	// TODO: Restrict POSTed data to namespace (else can overwrite catItem)
-	for(var key in data) {
+	for(var key in data)
 		containers[data.name][key] = data[key];
-	}
 
 	res.json(containers[data.name]);
 });
