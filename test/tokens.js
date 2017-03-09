@@ -6,9 +6,9 @@ var macaroons = require('macaroons.js');
 
 describe('Test token endpoint', function() {
 	var testStore = {
-		name: 'test-store',
+		name: 'test-store2',
 		type: 'store',
-		key: '8MDlgBNXfmklmQVTrJxfIwAjo8j5nIrE8aeFVIdn6Kg='
+		key: '7QlT8NZGg5SipDOUUff024nj81CvpZa0Zmz/qNehQYU='
 	};
 
 	var testApp = {
@@ -17,6 +17,21 @@ describe('Test token endpoint', function() {
 	};
 
 	it('POST /cm/upsert-container-info — Upsert fake store', (done) => {
+		var expected = JSON.parse(JSON.stringify(testStore));
+		testStore.catItem = {
+			'item-metadata': [
+				{
+					rel: 'urn:X-hypercat:rels:isContentType',
+					val: 'application/vnd.hypercat.catalogue+json'
+				},
+				{
+					rel: 'urn:X-hypercat:rels:hasDescription:en',
+					val: testStore.name
+				}
+			],
+			href: 'https://' + testStore.name + ':8080'
+		};
+
 		supertest
 			.post('/cm/upsert-container-info')
 			.auth(process.env.CM_KEY)
