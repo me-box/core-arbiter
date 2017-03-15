@@ -34,8 +34,16 @@ app.use(bodyParser.urlencoded({
 	extended: true
 }));
 
-app.get('/status', function(req, res){
+//app.use(express.static('www'));
+app.set('views', '.');
+app.set('view engine', 'pug');
+
+app.get('/status', function(req, res) {
 	res.send('active');
+});
+
+app.get('/ui', function(req, res) {
+	res.render('index', { containers });
 });
 
 /**********************************************************/

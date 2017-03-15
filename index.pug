@@ -1,0 +1,29 @@
+doctype html
+html(lang='en')
+	head
+		title Arbiter Perimission Records
+		style.
+			p, ul {
+				margin: 0;
+			}
+			.indent {
+				margin-left: 1em;
+			}
+	body
+		h1 Arbiter Permission Records
+		if !containers || !Object.keys(containers).length
+			p.indent No permissions have been granted yet
+		else
+			each container in containers
+				details.indent
+					summary= container.name
+					if !container.caveats
+						p.indent No permissions granted
+					else
+						each caveats, key in container.caveats
+							details.indent
+								- let route = JSON.parse(key);
+								summary= route.method + ' ' + route.target + route.path
+								ul
+									each caveat in caveats.length ? caveats : [ 'No additional caveats' ]
+										li= caveat
