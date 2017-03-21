@@ -322,7 +322,7 @@ app.get('/store/secret', function (req, res) {
 	}
 
 	if (req.container.secret) {
-		res.status(409).send('Store shared secret already retrieved');
+		res.send(req.container.secret.toString('base64'));
 		return;
 	}
 

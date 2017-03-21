@@ -195,7 +195,6 @@ NB: Container arbiter key (see developer guide) MUST be provided as per section 
   - 401: Invalid API key (see description above)
   - 500: Container type unknown by arbiter
   - 403: Container type [type] cannot use arbiter token minting capabilities as it is not a store type
-  - 409: Store shared secret already retrieved
   - 500: Unable to register container (secret generation)
 
 
