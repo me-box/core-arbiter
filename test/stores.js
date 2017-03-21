@@ -112,12 +112,16 @@ describe('Test store endpoints', function() {
 			.expect(200, true, done);
 	});
 
-	it('GET /store/secret — Get secret', (done) => {
+	it('GET /store/secret — Get secret again', (done) => {
 		supertest
 			.get('/store/secret')
 			.auth(storeKey)
 			.set('Content-Type', 'application/json')
 			.send(testStore)
-			.expect(409, 'Store shared secret already retrieved', done);
+			.expect(function (res) {
+				// TODO: Error handling
+				res.text = Buffer.from(res.text, 'base64').length === 32;
+			})
+			.expect(200, true, done);
 	});
 });
