@@ -11,19 +11,31 @@ var baseCat = require('./base-cat.json');
 
 var PORT = process.env.PORT || 8080;
 
-var HTTPS_SERVER_CERT = process.env.HTTPS_SERVER_CERT || '';
-var HTTPS_SERVER_PRIVATE_KEY = process.env.HTTPS_SERVER_PRIVATE_KEY || '';
+var HTTPS_SECRETS = JSON.parse(fs.readFileSync("/run/secrets/DATABOX_ARBITER_PEM.json") || {});
+var credentials = {
+	key:  HTTPS_SECRETS.clientprivate || '',
+	cert: HTTPS_SECRETS.clientcert || '',
+};
 
-var CM_KEY = process.env.CM_KEY || '';
+var CM_KEY = fs.readFileSync("/run/secrets/CM_KEY",{encoding:'base64'});
 
+var LOGSTORE_KEY = fs.readFileSync("/run/secrets/DATABOX_LOGSTORE_KEY",{encoding:'base64'});
+var EXPORT_SERVICE_KEY = fs.readFileSync("/run/secrets/DATABOX_EXPORT_SERVICE_KEY",{encoding:'base64'});
 var containers = {};
+
+//register the datbox logstore
+containers['databox-logstore'] = {};
+containers['databox-logstore']['key'] = LOGSTORE_KEY;
+containers['databox-logstore']['name'] = 'databox-logstore';
+containers['databox-logstore']['type'] = 'databox-logstore';
+containers['databox-export-service'] = {};
+containers['databox-export-service']['key'] = EXPORT_SERVICE_KEY;
+containers['databox-export-service']['name'] = 'databox-export-service';
+containers['databox-export-service']['type'] = 'databox-export-service';
 
 var app = express();
 
-var credentials = {
-	key:  HTTPS_SERVER_PRIVATE_KEY,
-	cert: HTTPS_SERVER_CERT,
-};
+
 
 // TODO: Check
 app.enable('trust proxy');

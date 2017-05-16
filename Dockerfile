@@ -9,3 +9,4 @@ LABEL databox.type="arbiter"
 EXPOSE 8080
 
 CMD ["npm","start"]
+#CMD ["sleep","99999"]
