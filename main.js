@@ -23,7 +23,11 @@ var LOGSTORE_KEY = fs.readFileSync("/run/secrets/DATABOX_LOGSTORE_KEY",{encoding
 var EXPORT_SERVICE_KEY = fs.readFileSync("/run/secrets/DATABOX_EXPORT_SERVICE_KEY",{encoding:'base64'});
 var containers = {};
 
-//register the datbox logstore
+//register the databox platform components
+containers['databox-container-manager'] = {};
+containers['databox-container-manager']['key'] = CM_KEY;
+containers['databox-container-manager']['name'] = 'databox-container-manager';
+containers['databox-container-manager']['type'] = 'CM';
 containers['databox-logstore'] = {};
 containers['databox-logstore']['key'] = LOGSTORE_KEY;
 containers['databox-logstore']['name'] = 'databox-logstore';
@@ -124,6 +128,8 @@ app.post('/cm/upsert-container-info', function (req, res) {
 	// TODO: Restrict POSTed data to namespace (else can overwrite catItem)
 	for(var key in data)
 		containers[data.name][key] = data[key];
+	
+	console.log("New container registered",data.name, data.key);
 
 	res.json(containers[data.name]);
 });
