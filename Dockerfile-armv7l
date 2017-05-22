@@ -1,4 +1,4 @@
-FROM hypriot/rpi-node:slim
+FROM armhf/node:7.9.0
 
 ADD package.json package.json
 RUN npm install && npm run clean
