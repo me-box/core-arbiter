@@ -11,16 +11,34 @@ var baseCat = require('./base-cat.json');
 
 var PORT = process.env.PORT || 8080;
 
-var HTTPS_SECRETS = JSON.parse(fs.readFileSync("/run/secrets/DATABOX_ARBITER_PEM.json") || {});
-var credentials = {
-	key:  HTTPS_SECRETS.clientprivate || '',
-	cert: HTTPS_SECRETS.clientcert || '',
-};
+let CM_KEY = '';
+let HTTPS_SECRETS = '';
+let LOGSTORE_KEY = '';
+let EXPORT_SERVICE_KEY = ''
+let credentials = {};
 
-var CM_KEY = fs.readFileSync("/run/secrets/CM_KEY",{encoding:'base64'});
+try {
+	//const ARBITER_KEY = process.env.ARBITER_TOKEN;
+	CM_KEY = fs.readFileSync("/run/secrets/CM_KEY",{encoding:'base64'});
+	LOGSTORE_KEY = fs.readFileSync("/run/secrets/DATABOX_LOGSTORE_KEY",{encoding:'base64'});
+	EXPORT_SERVICE_KEY = fs.readFileSync("/run/secrets/DATABOX_EXPORT_SERVICE_KEY",{encoding:'base64'});
+	
+	//HTTPS certs created by the container mangers for this components HTTPS server.
+	HTTPS_SECRETS = JSON.parse( fs.readFileSync("/run/secrets/DATABOX_ARBITER_PEM.json") );
+	credentials = {
+		key:  HTTPS_SECRETS.clientprivate || '',
+		cert: HTTPS_SECRETS.clientcert || '',
+	};
+} catch (e) {
+	//secrets missing ;-(
+	console.log("secrets missing ;-(",e);
+	CM_KEY = process.env.CM_KEY || ''; //make the tests work
+	HTTPS_SECRETS = '';
+	LOGSTORE_KEY = '';
+	EXPORT_SERVICE_KEY = ''
+	credentials = {};
+}
 
-var LOGSTORE_KEY = fs.readFileSync("/run/secrets/DATABOX_LOGSTORE_KEY",{encoding:'base64'});
-var EXPORT_SERVICE_KEY = fs.readFileSync("/run/secrets/DATABOX_EXPORT_SERVICE_KEY",{encoding:'base64'});
 var containers = {};
 
 //register the databox platform components
@@ -355,6 +373,7 @@ app.get('/store/secret', function (req, res) {
 	});
 });
 
+console.log("starting server",credentials);
 https.createServer(credentials, app).listen(PORT);
 
 module.exports = app;
