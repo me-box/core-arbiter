@@ -11,19 +11,53 @@ var baseCat = require('./base-cat.json');
 
 var PORT = process.env.PORT || 8080;
 
-var HTTPS_SERVER_CERT = process.env.HTTPS_SERVER_CERT || '';
-var HTTPS_SERVER_PRIVATE_KEY = process.env.HTTPS_SERVER_PRIVATE_KEY || '';
+let CM_KEY = '';
+let HTTPS_SECRETS = '';
+let LOGSTORE_KEY = '';
+let EXPORT_SERVICE_KEY = ''
+let credentials = {};
 
-var CM_KEY = process.env.CM_KEY || '';
+try {
+	//const ARBITER_KEY = process.env.ARBITER_TOKEN;
+	CM_KEY = fs.readFileSync("/run/secrets/CM_KEY",{encoding:'base64'});
+	LOGSTORE_KEY = fs.readFileSync("/run/secrets/DATABOX_LOGSTORE_KEY",{encoding:'base64'});
+	EXPORT_SERVICE_KEY = fs.readFileSync("/run/secrets/DATABOX_EXPORT_SERVICE_KEY",{encoding:'base64'});
+	
+	//HTTPS certs created by the container mangers for this components HTTPS server.
+	HTTPS_SECRETS = JSON.parse( fs.readFileSync("/run/secrets/DATABOX_ARBITER_PEM.json") );
+	credentials = {
+		key:  HTTPS_SECRETS.clientprivate || '',
+		cert: HTTPS_SECRETS.clientcert || '',
+	};
+} catch (e) {
+	//secrets missing ;-(
+	console.log("secrets missing ;-(",e);
+	CM_KEY = process.env.CM_KEY || ''; //make the tests work
+	HTTPS_SECRETS = '';
+	LOGSTORE_KEY = '';
+	EXPORT_SERVICE_KEY = ''
+	credentials = {};
+}
 
 var containers = {};
 
+//register the databox platform components
+containers['databox-container-manager'] = {};
+containers['databox-container-manager']['key'] = CM_KEY;
+containers['databox-container-manager']['name'] = 'databox-container-manager';
+containers['databox-container-manager']['type'] = 'CM';
+containers['databox-logstore'] = {};
+containers['databox-logstore']['key'] = LOGSTORE_KEY;
+containers['databox-logstore']['name'] = 'databox-logstore';
+containers['databox-logstore']['type'] = 'databox-logstore';
+containers['databox-export-service'] = {};
+containers['databox-export-service']['key'] = EXPORT_SERVICE_KEY;
+containers['databox-export-service']['name'] = 'databox-export-service';
+containers['databox-export-service']['type'] = 'databox-export-service';
+
 var app = express();
 
-var credentials = {
-	key:  HTTPS_SERVER_PRIVATE_KEY,
-	cert: HTTPS_SERVER_CERT,
-};
+
 
 // TODO: Check
 app.enable('trust proxy');
@@ -112,6 +146,8 @@ app.post('/cm/upsert-container-info', function (req, res) {
 	// TODO: Restrict POSTed data to namespace (else can overwrite catItem)
 	for(var key in data)
 		containers[data.name][key] = data[key];
+	
+	console.log("New container registered",data.name, data.key);
 
 	res.json(containers[data.name]);
 });
@@ -337,6 +373,7 @@ app.get('/store/secret', function (req, res) {
 	});
 });
 
+console.log("starting server",credentials);
 https.createServer(credentials, app).listen(PORT);
 
 module.exports = app;

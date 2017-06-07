@@ -1,7 +1,8 @@
-FROM node:alpine
+FROM armhf/node:7.9.0
 
 ADD package.json package.json
-RUN npm install
+RUN npm install && npm run clean
+
 ADD . .
 
 LABEL databox.type="arbiter"
@@ -9,4 +10,3 @@ LABEL databox.type="arbiter"
 EXPOSE 8080
 
 CMD ["npm","start"]
-#CMD ["sleep","99999"]
