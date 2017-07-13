@@ -1,6 +1,6 @@
 # Databox Arbiter
 
-The Databox Docker container that manages the flow of data by minting tokens and controlling store discovery. This code is not meant to be run on its own except for debug purposes. The live version is automatically pulled from https://databox.amar.io (see [registry catalogue](https://databox.amar.io/v2/_catalog)) as "databox-arbiter" and launched by the [container manager](https://github.com/me-box/databox-container-manager.git).
+The Databox Docker container that manages the flow of data by minting tokens and controlling store discovery. This code is not meant to be run on its own except for debug purposes. The live version is automatically pulled from https://databox.amar.io (see [registry catalogue](https://databox.amar.io/v2/_catalog)) as "databox-arbiter" and launched by the [container manager](https://github.com/me-box/core-container-manager.git).
 
 If you are a Databox app or driver developer, skip to [the relevant API documentation](#container-facing).
 

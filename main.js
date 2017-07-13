@@ -42,18 +42,18 @@ try {
 var containers = {};
 
 //register the databox platform components
-containers['databox-container-manager'] = {};
-containers['databox-container-manager']['key'] = CM_KEY;
-containers['databox-container-manager']['name'] = 'databox-container-manager';
-containers['databox-container-manager']['type'] = 'CM';
-containers['databox-logstore'] = {};
-containers['databox-logstore']['key'] = LOGSTORE_KEY;
-containers['databox-logstore']['name'] = 'databox-logstore';
-containers['databox-logstore']['type'] = 'databox-logstore';
-containers['databox-export-service'] = {};
-containers['databox-export-service']['key'] = EXPORT_SERVICE_KEY;
-containers['databox-export-service']['name'] = 'databox-export-service';
-containers['databox-export-service']['type'] = 'databox-export-service';
+containers['container-manager'] = {};
+containers['container-manager']['key'] = CM_KEY;
+containers['container-manager']['name'] = 'container-manager';
+containers['container-manager']['type'] = 'CM';
+containers['syslog'] = {};
+containers['syslog']['key'] = LOGSTORE_KEY;
+containers['syslog']['name'] = 'syslog';
+containers['syslog']['type'] = 'syslog';
+containers['export-service'] = {};
+containers['export-service']['key'] = EXPORT_SERVICE_KEY;
+containers['export-service']['name'] = 'export-service';
+containers['export-service']['type'] = 'export-service';
 
 var app = express();
 
@@ -323,7 +323,7 @@ app.post('/token', function(req, res){
 
 	crypto.randomBytes(32, function(err, buffer){
 		// TODO: Get hostname from environment variable instead of hardcoding
-		var mb = new macaroons.MacaroonsBuilder('https://databox-arbiter:' + PORT, targetContainer.secret, buffer.toString('base64'));
+		var mb = new macaroons.MacaroonsBuilder('https://arbiter:' + PORT, targetContainer.secret, buffer.toString('base64'));
 		mb
 			.add_first_party_caveat('target = ' + data.target)
 			.add_first_party_caveat('path = ' + data.path)
