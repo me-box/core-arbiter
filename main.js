@@ -24,10 +24,9 @@ try {
 	EXPORT_SERVICE_KEY = fs.readFileSync("/run/secrets/DATABOX_EXPORT_SERVICE_KEY",{encoding:'base64'});
 	
 	//HTTPS certs created by the container mangers for this components HTTPS server.
-	HTTPS_SECRETS = JSON.parse( fs.readFileSync("/run/secrets/DATABOX_ARBITER_PEM.json") );
 	credentials = {
-		key:  HTTPS_SECRETS.clientprivate || '',
-		cert: HTTPS_SECRETS.clientcert || '',
+		key:  fs.readFileSync("/run/secrets/DATABOX_ARBITER.pem"),
+		cert: fs.readFileSync("/run/secrets/DATABOX_ARBITER.pem"),
 	};
 } catch (e) {
 	//secrets missing ;-(
