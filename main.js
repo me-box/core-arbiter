@@ -360,13 +360,13 @@ app.get('/store/secret', function (req, res) {
 	}
 
 	if (req.container.secret) {
-        	res.send(new Buffer(req.container.secret).toString('base64'));
+		res.send(new Buffer(req.container.secret).toString('base64'));
 		return;
 	}
 
 	// NOTE: Actually should be 8 / log2(62), but 4 / 3 is close enough.
-        req.container.secret = randomstring.generate(randStrOpts);
-        res.send(new Buffer(req.container.secret).toString('base64'));
+	req.container.secret = randomstring.generate(randStrOpts);
+	res.send(new Buffer(req.container.secret).toString('base64'));
 
 });
 
