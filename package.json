@@ -1,6 +1,6 @@
 {
   "name": "databox-arbiter",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "The Databox Docker container that manages the flow of data",
   "config": {
     "registry": "registry.iotdatabox.com"
@@ -47,6 +47,7 @@
     "modclean": "",
     "path-to-regexp": "^1.7.0",
     "pug": "^2.0.0-beta11",
+    "randomstring": "^1.1.5",
     "request": "^2.72.0"
   },
   "devDependencies": {

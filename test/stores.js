@@ -107,7 +107,7 @@ describe('Test store endpoints', function() {
 			.send(testStore)
 			.expect(function (res) {
 				// TODO: Error handling
-				res.text = Buffer.from(res.text, 'base64').length === 32;
+				res.text = Buffer.from(res.text, 'base64').length === 128;
 			})
 			.expect(200, true, done);
 	});
@@ -120,7 +120,7 @@ describe('Test store endpoints', function() {
 			.send(testStore)
 			.expect(function (res) {
 				// TODO: Error handling
-				res.text = Buffer.from(res.text, 'base64').length === 32;
+				res.text = Buffer.from(res.text, 'base64').length === 128;
 			})
 			.expect(200, true, done);
 	});

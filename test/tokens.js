@@ -111,7 +111,7 @@ describe('Test token endpoint', function() {
 			.expect(function (res) {
 				storeSecret = res.text;
 				// TODO: Error handling
-				res.text = Buffer.from(res.text, 'base64').length === 32;
+				res.text = Buffer.from(res.text, 'base64').length === 128;
 			})
 			.expect(200, true, done);
 	});

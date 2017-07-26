@@ -8,6 +8,7 @@ var macaroons = require('macaroons.js');
 var pathToRegexp = require('path-to-regexp');
 var basicAuth = require('basic-auth');
 var baseCat = require('./base-cat.json');
+var randomstring = require('randomstring');
 
 var PORT = process.env.PORT || 8080;
 
@@ -357,19 +358,13 @@ app.get('/store/secret', function (req, res) {
 	}
 
 	if (req.container.secret) {
-		res.send(req.container.secret.toString('base64'));
+		res.send(req.container.secret);
 		return;
 	}
 
-	crypto.randomBytes(macaroons.MacaroonsConstants.MACAROON_SUGGESTED_SECRET_LENGTH, function(err, buffer){
-		if (err != null) {
-			res.status(500).send('Unable to register container (secret generation)');
-			return;
-		}
+        req.container.secret = new Buffer(randomstring.generate({ length: 128 })).toString('base64');
+        res.send(req.container.secret);
 
-		req.container.secret = buffer;
-		res.send(buffer.toString('base64'));
-	});
 });
 
 console.log("starting server",credentials);
