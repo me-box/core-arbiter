@@ -9,7 +9,6 @@ var pathToRegexp = require('path-to-regexp');
 var basicAuth = require('basic-auth');
 var baseCat = require('./base-cat.json');
 var randomstring = require('randomstring');
-var base64 = require('base-64');
 
 var PORT = process.env.PORT || 8080;
 
