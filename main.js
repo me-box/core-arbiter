@@ -8,7 +8,7 @@ var macaroons = require('macaroons.js');
 var pathToRegexp = require('path-to-regexp');
 var basicAuth = require('basic-auth');
 var baseCat = require('./base-cat.json');
-var randomstring = require("randomstring");
+var randomstring = require('randomstring');
 var base64 = require('base-64');
 
 var PORT = process.env.PORT || 8080;
@@ -322,7 +322,7 @@ app.post('/token', function(req, res){
 		return;
 	}
 
-    crypto.randomBytes(32, function(err, buffer){
+	crypto.randomBytes(32, function(err, buffer){
 		// TODO: Get hostname from environment variable instead of hardcoding
 		var mb = new macaroons.MacaroonsBuilder('https://arbiter:' + PORT, targetContainer.secret, buffer.toString('base64'));
 		mb
@@ -359,14 +359,12 @@ app.get('/store/secret', function (req, res) {
 	}
 
 	if (req.container.secret) {
-		res.send(req.container.secret.toString('base64'));
+		res.send(req.container.secret);
 		return;
 	}
 
-        secret = randomstring.generate(({ length: 128 }));
-        req.container.secret = secret;
-        encodedSecret = base64.encode(secret);
-        res.send(encodedSecret);
+        req.container.secret = new Buffer(randomstring.generate({ length: 128 })).toString('base64');
+        res.send(req.container.secret);
 
 });
 
