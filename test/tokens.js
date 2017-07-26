@@ -111,7 +111,7 @@ describe('Test token endpoint', function() {
 			.expect(function (res) {
 				storeSecret = res.text;
 				// TODO: Error handling
-				res.text = Buffer.from(res.text, 'base64').length === 128;
+				res.text = Buffer.from(res.text, 'base64').length === Math.ceil((4 / 3) * macaroons.MacaroonsConstants.MACAROON_SUGGESTED_SECRET_LENGTH);
 			})
 			.expect(200, true, done);
 	});

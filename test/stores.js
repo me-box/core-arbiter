@@ -2,6 +2,7 @@ process.env.CM_KEY = 'chrC9e52tR5ljd+02Shg6khojHNUpAhaqAplQ1jFgCw='
 
 var supertest = require('supertest')(require('../main.js'));
 var assert = require('assert');
+var macaroons = require('macaroons.js');
 
 describe('Test store endpoints', function() {
 	var storeKey = '8MDlgBNXfmklmQVTrJxfIwAjo8j5nIrE8aeFVIdn6Kg=';
@@ -107,7 +108,7 @@ describe('Test store endpoints', function() {
 			.send(testStore)
 			.expect(function (res) {
 				// TODO: Error handling
-				res.text = Buffer.from(res.text, 'base64').length === 128;
+				res.text = Buffer.from(res.text, 'base64').length === Math.ceil((4 / 3) * macaroons.MacaroonsConstants.MACAROON_SUGGESTED_SECRET_LENGTH);
 			})
 			.expect(200, true, done);
 	});
@@ -120,7 +121,7 @@ describe('Test store endpoints', function() {
 			.send(testStore)
 			.expect(function (res) {
 				// TODO: Error handling
-				res.text = Buffer.from(res.text, 'base64').length === 128;
+				res.text = Buffer.from(res.text, 'base64').length === Math.ceil((4 / 3) * macaroons.MacaroonsConstants.MACAROON_SUGGESTED_SECRET_LENGTH);
 			})
 			.expect(200, true, done);
 	});
