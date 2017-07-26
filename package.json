@@ -38,6 +38,7 @@
   },
   "homepage": "https://github.com/me-box/databox-arbiter#readme",
   "dependencies": {
+    "base-64": "^0.1.0",
     "basic-auth": "^1.1.0",
     "body-parser": "^1.14.2",
     "chokidar": "^1.7.0",
@@ -47,6 +48,7 @@
     "modclean": "",
     "path-to-regexp": "^1.7.0",
     "pug": "^2.0.0-beta11",
+    "randomstring": "^1.1.5",
     "request": "^2.72.0"
   },
   "devDependencies": {
