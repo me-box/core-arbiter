@@ -108,7 +108,7 @@ describe('Test store endpoints', function() {
 			.send(testStore)
 			.expect(function (res) {
 				// TODO: Error handling
-				res.text = Buffer.from(res.text, 'base64').length === Math.ceil((4 / 3) * macaroons.MacaroonsConstants.MACAROON_SUGGESTED_SECRET_LENGTH);
+				res.text = res.text.length === Math.ceil((4 / 3) * macaroons.MacaroonsConstants.MACAROON_SUGGESTED_SECRET_LENGTH);
 			})
 			.expect(200, true, done);
 	});
@@ -121,7 +121,7 @@ describe('Test store endpoints', function() {
 			.send(testStore)
 			.expect(function (res) {
 				// TODO: Error handling
-				res.text = Buffer.from(res.text, 'base64').length === Math.ceil((4 / 3) * macaroons.MacaroonsConstants.MACAROON_SUGGESTED_SECRET_LENGTH);
+				res.text = res.text.length === Math.ceil((4 / 3) * macaroons.MacaroonsConstants.MACAROON_SUGGESTED_SECRET_LENGTH);
 			})
 			.expect(200, true, done);
 	});
