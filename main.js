@@ -337,6 +337,7 @@ app.post('/token', function(req, res){
 
 /**********************************************************/
 
+// NOTE: Actually should be 8 / log2(62), but 4 / 3 is close enough.
 let randStrOpts = { length: Math.ceil((4 / 3) * macaroons.MacaroonsConstants.MACAROON_SUGGESTED_SECRET_LENGTH) };
 
 app.get('/store/secret', function (req, res) {
@@ -360,13 +361,12 @@ app.get('/store/secret', function (req, res) {
 	}
 
 	if (req.container.secret) {
-		res.send(new Buffer(req.container.secret).toString('base64'));
+		res.send(req.container.secret);
 		return;
 	}
 
-	// NOTE: Actually should be 8 / log2(62), but 4 / 3 is close enough.
 	req.container.secret = randomstring.generate(randStrOpts);
-	res.send(new Buffer(req.container.secret).toString('base64'));
+	res.send(req.container.secret);
 
 });
 
