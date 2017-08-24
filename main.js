@@ -14,14 +14,12 @@ var PORT = process.env.PORT || 8080;
 
 let CM_KEY = '';
 let HTTPS_SECRETS = '';
-let LOGSTORE_KEY = '';
 let EXPORT_SERVICE_KEY = ''
 let credentials = {};
 
 try {
 	//const ARBITER_KEY = process.env.ARBITER_TOKEN;
 	CM_KEY = fs.readFileSync("/run/secrets/CM_KEY",{encoding:'base64'});
-	LOGSTORE_KEY = fs.readFileSync("/run/secrets/DATABOX_LOGSTORE_KEY",{encoding:'base64'});
 	EXPORT_SERVICE_KEY = fs.readFileSync("/run/secrets/DATABOX_EXPORT_SERVICE_KEY",{encoding:'base64'});
 	
 	//HTTPS certs created by the container mangers for this components HTTPS server.
@@ -34,7 +32,6 @@ try {
 	console.log("secrets missing ;-(",e);
 	CM_KEY = process.env.CM_KEY || ''; //make the tests work
 	HTTPS_SECRETS = '';
-	LOGSTORE_KEY = '';
 	EXPORT_SERVICE_KEY = ''
 	credentials = {};
 }
@@ -46,10 +43,6 @@ containers['container-manager'] = {};
 containers['container-manager']['key'] = CM_KEY;
 containers['container-manager']['name'] = 'container-manager';
 containers['container-manager']['type'] = 'CM';
-containers['syslog'] = {};
-containers['syslog']['key'] = LOGSTORE_KEY;
-containers['syslog']['name'] = 'syslog';
-containers['syslog']['type'] = 'syslog';
 containers['export-service'] = {};
 containers['export-service']['key'] = EXPORT_SERVICE_KEY;
 containers['export-service']['name'] = 'export-service';
