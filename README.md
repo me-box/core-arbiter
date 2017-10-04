@@ -51,7 +51,7 @@ Method: POST
 
 Upserts the record of containers and the extent of their corresponding permissions (default none) maintained by the arbiter.
 
-NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
+NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://www.hypercat.io/uploads/1/2/4/4/12443814/hypercat_specification_3.00rc1-2016-02-23.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
 
 ##### Parameters
 
@@ -79,7 +79,7 @@ Method: POST
 
 Deletes a containers record by name.
 
-NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
+NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://www.hypercat.io/uploads/1/2/4/4/12443814/hypercat_specification_3.00rc1-2016-02-23.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
 
 ##### Parameters
 
@@ -110,7 +110,7 @@ Routes are encoded into tokens (as macaroon caveats). Routes are made up of a ta
 
 Paths are JSON-formatted whitelists of accessible endpoints formatted as defined [here](https://github.com/pillarjs/path-to-regexp#parameters) and are testable [here](http://forbeslindesay.github.io/express-route-tester/). More information [here](https://github.com/me-box/admin/blob/master/specs/token-auth.md#path--datasourceapi). The arbiter will mint tokens to paths (exact or RegExp) that match granted path permissions following those RegExp rules.
 
-NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
+NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://www.hypercat.io/uploads/1/2/4/4/12443814/hypercat_specification_3.00rc1-2016-02-23.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
 
 ##### Parameters
 
@@ -142,7 +142,7 @@ Method: POST
 
 Does the opposite of `/cm/grant-container-permissions`. If the specified path is a RegExp path, then _all_ matches will be revoked, so use wildcards carefully.
 
-NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
+NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://www.hypercat.io/uploads/1/2/4/4/12443814/hypercat_specification_3.00rc1-2016-02-23.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
 
 ##### Parameters
 
