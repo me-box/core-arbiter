@@ -1,17 +1,17 @@
 # Databox Arbiter
 
-The Databox Docker container that manages the flow of data by minting tokens and controlling store discovery. This code is not meant to be run on its own except for debug purposes. The live version is automatically pulled from https://databox.amar.io (see [registry catalogue](https://databox.amar.io/v2/_catalog)) as "databox-arbiter" and launched by the [container manager](https://github.com/me-box/core-container-manager.git).
+The Databox Docker container that manages the flow of data by minting tokens and controlling store discovery. This code is not meant to be run on its own except for debug purposes. 
 
 If you are a Databox app or driver developer, skip to [the relevant API documentation](#container-facing).
 
-Further background info for Databox system devs [here](docs/further-info.md) (*NB: Outdated*).
+Further background info for Databox platform [here](https://github.com/me-box/databox).
 
 
 For debug purposes:
 
 ## Installation
-	git clone https://github.com/me-box/databox-arbiter.git
-	cd databox-arbiter
+	git clone https://github.com/me-box/core-arbiter.git
+	cd core-arbiter
 	npm install
 
 ## Usage
@@ -29,7 +29,7 @@ Default port is 8080 (HTTPS only), but in case of lack of privileges, can be ove
 All request bodies should be `application/json`.
 
 ### CM-facing
-_(for Databox developers)_
+_(for Databox core-component developers)_
 
 #### /status
 
