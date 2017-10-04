@@ -1,5 +1,6 @@
-## Further information
 
+## Further information
+(This is not an up-to-date document)
 ### Macaroons
 
 Macaroons are bearer tokens, similar to signed cookies, to which one can add verifiable caveats. See the sidebar [here](http://macaroons.io/) for more information.
