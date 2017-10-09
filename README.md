@@ -1,17 +1,17 @@
 # Databox Arbiter
 
-The Databox Docker container that manages the flow of data by minting tokens and controlling store discovery. This code is not meant to be run on its own except for debug purposes. The live version is automatically pulled from https://databox.amar.io (see [registry catalogue](https://databox.amar.io/v2/_catalog)) as "databox-arbiter" and launched by the [container manager](https://github.com/me-box/core-container-manager.git).
+The Databox Docker container that manages the flow of data by minting tokens and controlling store discovery. This code is not meant to be run on its own except for debug purposes. 
 
 If you are a Databox app or driver developer, skip to [the relevant API documentation](#container-facing).
 
-Further background info for Databox system devs [here](docs/further-info.md) (*NB: Outdated*).
+Further background info for Databox platform [here](https://github.com/me-box/databox).
 
 
 For debug purposes:
 
 ## Installation
-	git clone https://github.com/me-box/databox-arbiter.git
-	cd databox-arbiter
+	git clone https://github.com/me-box/core-arbiter.git
+	cd core-arbiter
 	npm install
 
 ## Usage
@@ -29,7 +29,7 @@ Default port is 8080 (HTTPS only), but in case of lack of privileges, can be ove
 All request bodies should be `application/json`.
 
 ### CM-facing
-_(for Databox developers)_
+_(for Databox core-component developers)_
 
 #### /status
 
@@ -51,7 +51,7 @@ Method: POST
 
 Upserts the record of containers and the extent of their corresponding permissions (default none) maintained by the arbiter.
 
-NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
+NB: CM arbiter key MUST be provided as per the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276605/PAS212-corr.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
 
 ##### Parameters
 
@@ -79,7 +79,7 @@ Method: POST
 
 Deletes a containers record by name.
 
-NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
+NB: CM arbiter key MUST be provided as per the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276605/PAS212-corr.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
 
 ##### Parameters
 
@@ -110,7 +110,7 @@ Routes are encoded into tokens (as macaroon caveats). Routes are made up of a ta
 
 Paths are JSON-formatted whitelists of accessible endpoints formatted as defined [here](https://github.com/pillarjs/path-to-regexp#parameters) and are testable [here](http://forbeslindesay.github.io/express-route-tester/). More information [here](https://github.com/me-box/admin/blob/master/specs/token-auth.md#path--datasourceapi). The arbiter will mint tokens to paths (exact or RegExp) that match granted path permissions following those RegExp rules.
 
-NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
+NB: CM arbiter key MUST be provided as per the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276605/PAS212-corr.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
 
 ##### Parameters
 
@@ -142,7 +142,7 @@ Method: POST
 
 Does the opposite of `/cm/grant-container-permissions`. If the specified path is a RegExp path, then _all_ matches will be revoked, so use wildcards carefully.
 
-NB: CM arbiter key MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
+NB: CM arbiter key MUST be provided as per the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276605/PAS212-corr.pdf). The arbiter will not accept requests that don't include a key that matches that passed to it in the `CM_KEY` environment variable on launch.
 
 ##### Parameters
 
@@ -179,7 +179,7 @@ Method: GET
 
 Registers a store allowing the arbiter to mint macaroons for the store, and for the store to verify these macaroons independently.
 
-NB: Container arbiter key (see developer guide) MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). Containers without proper authorization will not be able to discover certain items, or will be able to discover them but not access them. In the latter case, they are informed as per section 7.3.1.2 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf).
+NB: Container arbiter key (see developer guide) MUST be provided as per the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276605/PAS212-corr.pdf). Containers without proper authorization will not be able to discover certain items, or will be able to discover them but not access them. In the latter case, they are informed as per section 7.3.1.2 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276605/PAS212-corr.pdf).
 
 ##### Parameters
 
@@ -208,7 +208,7 @@ Method: GET
 
 Serves a top-level [Hypercat](http://www.hypercat.io/) catalogue.
 
-NB: Container arbiter key (see developer guide) MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). Containers without proper authorization will not be able to discover certain items, or will be able to discover them but not access them. In the latter case, they are informed as per section 7.3.1.2 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf).
+NB: Container arbiter key (see developer guide) MUST be provided as per the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276605/PAS212-corr.pdf). Containers without proper authorization will not be able to discover certain items, or will be able to discover them but not access them. In the latter case, they are informed as per the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276605/PAS212-corr.pdf).
 
 ##### Response
 
@@ -228,7 +228,7 @@ Method: POST
 
 Provides store tokens for containers.
 
-NB: Container arbiter key (see developer guide) MUST be provided as per section 7.1 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf). Containers without proper authorization will not be able to discover certain items, or will be able to discover them but not access them. In the latter case, they are informed as per section 7.3.1.2 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276778/PAS_212.pdf).
+NB: Container arbiter key (see developer guide) MUST be provided as per the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276605/PAS212-corr.pdf). Containers without proper authorization will not be able to discover certain items, or will be able to discover them but not access them. In the latter case, they are informed as per section 7.3.1.2 of the [Hypercat 3.0 specs](http://shop.bsigroup.com/upload/276605/PAS212-corr.pdf).
 
 ##### Parameters
 
