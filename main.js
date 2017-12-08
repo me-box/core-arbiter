@@ -21,7 +21,7 @@ try {
 	//const ARBITER_KEY = process.env.ARBITER_TOKEN;
 	CM_KEY = fs.readFileSync("/run/secrets/CM_KEY",{encoding:'base64'});
 	EXPORT_SERVICE_KEY = fs.readFileSync("/run/secrets/DATABOX_EXPORT_SERVICE_KEY",{encoding:'base64'});
-	
+
 	//HTTPS certs created by the container mangers for this components HTTPS server.
 	credentials = {
 		key:  fs.readFileSync("/run/secrets/DATABOX_ARBITER.pem"),
@@ -121,6 +121,11 @@ app.post('/cm/upsert-container-info', function (req, res) {
 
 	// TODO: Store in a DB maybe? Probably not.
 	if (data.type === 'store' && containers[data.name].type !== 'store') {
+		let href = 'https://' + data.name + ':8080';
+		//TODO this is a hack for core-store over Zest
+		if(href.includes('core-store')) {
+			href = 'tcp://' + data.name + ':5555';
+		}
 		containers[data.name].catItem = {
 			'item-metadata': [
 				{
@@ -132,14 +137,14 @@ app.post('/cm/upsert-container-info', function (req, res) {
 					val: data.name
 				}
 			],
-			href: 'https://' + data.name + ':8080'
+			'href': href
 		};
 	}
 
 	// TODO: Restrict POSTed data to namespace (else can overwrite catItem)
 	for(var key in data)
 		containers[data.name][key] = data[key];
-	
+
 	console.log("New container registered",data.name, data.key);
 
 	res.json(containers[data.name]);
