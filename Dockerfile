@@ -1,17 +1,7 @@
-FROM node:alpine
+FROM jptmoore/arbiter
 
-RUN apk add --update make gcc g++ python curl git krb5-dev zeromq-dev && \
-npm install zeromq --zmq-external --save && \
-apk del make gcc g++ python curl git krb5-dev
+EXPOSE 4444
+EXPOSE 4445
 
-ADD ./package.json /package.json
-RUN npm install --production && npm run clean
-
-ADD . .
-
-LABEL databox.type="arbiter"
-
-EXPOSE 8080
-
-CMD ["npm","start"]
-#CMD ["sleep","99999"]
+CMD ["/app/zest/server.exe","--databox", "--request-endpoint=tcp://0.0.0.0:4444", "--enable-logging"]
+#CMD ["/app/zest/server.exe","--secret-key-file=/run/secrets/ZMQ_SECRET_KEY", "--token-key-file=/run/secrets/CM_KEY", "--enable-logging"]
