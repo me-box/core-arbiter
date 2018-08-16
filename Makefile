@@ -1,13 +1,23 @@
-PACKAGE  = databox
-DATABOX_GOPATH="$(shell echo ~/go):$(shell pwd):$(shell echo ${GOPATH})"
-.PHONY: all
-all: build
+IMAGE_NAME=core-arbiter
+DEFAULT_REG=databoxsystems
+VERSION=latest
 
-.PHONY: build
-build:
-	docker build -t dev/arbiter .
+.PHONY: all
+all: build-amd64 build-arm64v8 publish-images
+
+.PHONY: build-amd64
+build-amd64:
+	docker build -t $(DEFAULT_REG)/$(IMAGE_NAME)-amd64:$(VERSION) . $(OPTS)
+
+.PHONY: build-arm64v8
+build-arm64v8:
+	docker build -t $(DEFAULT_REG)/$(IMAGE_NAME)-arm64v8:$(VERSION) -f Dockerfile-arm64v8 .  $(OPTS)
+
+.PHONY: publish-images
+publish-images:
+	docker push $(DEFAULT_REG)/$(IMAGE_NAME)-amd64:$(VERSION)
+	docker push $(DEFAULT_REG)/$(IMAGE_NAME)-arm64v8:$(VERSION)
 
 .PHONY: test
 test:
-	#does it build is the best we can do here fror now
-	docker build -t dev/arbiter . --no-cache
+#NOT IMPLIMENTED
