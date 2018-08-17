@@ -1,4 +1,4 @@
-IMAGE_NAME=core-arbiter
+IMAGE_NAME=arbiter
 DEFAULT_REG=databoxsystems
 VERSION=latest
 
