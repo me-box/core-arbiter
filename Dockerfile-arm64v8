@@ -1,0 +1,12 @@
+FROM jptmoore/arbiter-aarch64:v0.0.3
+
+EXPOSE 4444
+EXPOSE 4445
+
+RUN addgroup -S databox && adduser -S -g databox databox && \
+chown -R databox:databox /home/databox
+
+USER databox
+
+#CMD ["/home/databox/server.exe","--databox", "--request-endpoint=tcp://0.0.0.0:4444"]
+CMD ["/home/databox/server.exe","--databox", "--request-endpoint=tcp://0.0.0.0:4444", "--enable-logging"]
