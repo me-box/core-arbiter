@@ -1,4 +1,4 @@
-FROM jptmoore/arbiter:v0.0.3
+FROM jptmoore/arbiter:v0.0.4
 
 EXPOSE 4444
 EXPOSE 4445
